@@ -18,6 +18,8 @@ func main() {
 	r.HandleFunc("/deletetodo", todos.DeleteTodo)
 	r.HandleFunc("/edittodo", todos.EditTodo)
 	r.HandleFunc("/donetodo", todos.DoneTodo)
+	r.HandleFunc("/gettodoList", todos.GetTodoList)
+	r.HandleFunc("/gettodo", todos.GetTodo)
 	http.ListenAndServe(":8080", r)
 
 }
