@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"todo-app/todos"
 	"todo-app/users"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -12,6 +13,11 @@ func main() {
 	r := mux.NewRouter()
 	user := users.NewCreateUser()
 	r.HandleFunc("/createuser", user.CreateUser)
+	r.HandleFunc("/login", users.Login)
+	r.HandleFunc("/createtodo", todos.CreateTodo)
+	r.HandleFunc("/deletetodo", todos.DeleteTodo)
+	r.HandleFunc("/edittodo", todos.EditTodo)
+	r.HandleFunc("/donetodo", todos.DoneTodo)
 	http.ListenAndServe(":8080", r)
 
 }

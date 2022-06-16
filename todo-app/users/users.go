@@ -15,8 +15,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type User struct {
-	ID        int       `json:"id"`
+type CreateUser struct {
 	Name      string    `json:"name"`
 	Email     string    `json:"email"`
 	PassWord  string    `json:"password"`
@@ -30,7 +29,7 @@ type CreateUserBody struct {
 	PassWord string `json:"password"`
 }
 
-func (user *User) CreateUser(w http.ResponseWriter, r *http.Request) {
+func (user *CreateUser) CreateUser(w http.ResponseWriter, r *http.Request) {
 	e := godotenv.Load()
 	if e != nil {
 		log.Fatal(e)
@@ -61,7 +60,7 @@ func (user *User) CreateUser(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	userData := User{1, name, email, string(hashPassWord), time.Now(), time.Now()}
+	userData := CreateUser{name, email, string(hashPassWord), time.Now(), time.Now()}
 
 	stmt, err := db.Prepare("INSERT INTO users (Name,Email,PassWord,CreatedAt,UpdatedAt) VALUES(?,?,?,?,?)")
 	if err != nil {
@@ -79,6 +78,6 @@ func (user *User) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func NewCreateUser() *User {
-	return new(User)
+func NewCreateUser() *CreateUser {
+	return new(CreateUser)
 }
