@@ -69,10 +69,12 @@ func GetTodoList(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	jsonData, _ := json.Marshal(data)
+	// jsonData, _ := json.Marshal(data)
 
 	w.Header().Set("Content-Type", "applicaiton/json")
+	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
 
-	json.NewEncoder(w).Encode(string(jsonData))
+	json.NewEncoder(w).Encode(data)
 
 }
