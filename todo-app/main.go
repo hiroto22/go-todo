@@ -17,7 +17,7 @@ func main() {
 	r.HandleFunc("/createtodo", todos.CreateTodo)
 	r.HandleFunc("/deletetodo", todos.DeleteTodo)
 	r.HandleFunc("/edittodo", todos.EditTodo)
-	r.HandleFunc("/donetodo", todos.DoneTodo)
+	r.HandleFunc("/completetodo", todos.DoneTodo)
 	r.HandleFunc("/gettodoList", todos.GetTodoList)
 	r.HandleFunc("/gettodo", todos.GetTodo)
 	http.ListenAndServe(":8080", r)

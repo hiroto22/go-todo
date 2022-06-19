@@ -24,14 +24,14 @@ func DoneTodo(w http.ResponseWriter, r *http.Request) {
 	defer db.Close()
 
 	id := r.URL.Query().Get("id")
-	isDone := r.URL.Query().Get("isDone")
+	isComplete := r.URL.Query().Get("isComplete")
 
 	stmt, err := db.Prepare("UPDATE todos set IsDone=? WHERE ID=?")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if isDone == "false" {
+	if isComplete == "false" {
 		_, err = stmt.Exec(true, id)
 		if err != nil {
 			log.Fatal(err)
@@ -44,6 +44,8 @@ func DoneTodo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "applicaiton/json")
+	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
 
 	json.NewEncoder(w).Encode(id)
 

@@ -39,9 +39,13 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Fatal(err)
+
 	}
 
+	log.Printf("request body=%s\n", r.Body)
+
 	var data TodoBody
+
 	if err := json.Unmarshal(body, &data); err != nil {
 		log.Fatal(err)
 	}
@@ -62,6 +66,10 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "applicaiton/json")
+	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Access-Control-Allow-Methods", "POST")
 
 	json.NewEncoder(w).Encode(todoData)
 
