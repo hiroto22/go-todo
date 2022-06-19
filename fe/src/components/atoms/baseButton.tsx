@@ -8,7 +8,11 @@ type onClickBaseButton = {
 
 export const BaseButton = (props: onClickBaseButton) => {
   return (
-    <Button variant="outlined" sx={{ height: "80%" }} onClick={props.onClick}>
+    <Button
+      variant="outlined"
+      sx={{ height: "80%", margin: "3px" }}
+      onClick={props.onClick}
+    >
       {props.text}
     </Button>
   );

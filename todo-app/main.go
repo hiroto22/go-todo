@@ -12,14 +12,14 @@ import (
 func main() {
 	r := mux.NewRouter()
 	user := users.NewCreateUser()
-	r.HandleFunc("/createuser", user.CreateUser).Methods("POST")
-	r.HandleFunc("/login", users.Login).Methods("POST")
-	r.HandleFunc("/createtodo", todos.CreateTodo).Methods("POST")
-	r.HandleFunc("/deletetodo", todos.DeleteTodo).Methods("DELETE")
-	r.HandleFunc("/edittodo", todos.EditTodo).Methods("POST")
-	r.HandleFunc("/completetodo", todos.DoneTodo).Methods("POST")
-	r.HandleFunc("/gettodoList", todos.GetTodoList).Methods("GET")
-	r.HandleFunc("/gettodo", todos.GetTodo).Methods("GET")
+	r.HandleFunc("/createuser", user.CreateUser)
+	r.HandleFunc("/login", users.Login)
+	r.HandleFunc("/createtodo", todos.CreateTodo)
+	r.HandleFunc("/deletetodo", todos.DeleteTodo)
+	r.HandleFunc("/edittodo", todos.EditTodo)
+	r.HandleFunc("/completetodo", todos.DoneTodo)
+	r.HandleFunc("/gettodoList", todos.GetTodoList)
+	r.HandleFunc("/gettodo", todos.GetTodo)
 	http.ListenAndServe(":8080", r)
 
 }

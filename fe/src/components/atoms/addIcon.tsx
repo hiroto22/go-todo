@@ -1,10 +1,17 @@
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import styled from "styled-components";
 
-export const AddIcon = () => {
+type AddIconBUtton = {
+  onClick: any;
+};
+
+export const AddIcon = (props: AddIconBUtton) => {
   return (
     <SDiv>
-      <AddCircleIcon sx={{ width: "10%", height: "10%" }} />
+      <AddCircleIcon
+        sx={{ width: "10%", height: "10%" }}
+        onClick={props.onClick}
+      />
     </SDiv>
   );
 };

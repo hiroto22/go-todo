@@ -12,4 +12,13 @@ module.exports = function (app: any) {
       headers: headers,
     })
   );
+
+  app.use(
+    proxy("/addtodo", {
+      target: "http://127.0.0.1:8080",
+      changeOrigin: true,
+      secure: false,
+      headers: headers,
+    })
+  );
 };

@@ -7,6 +7,7 @@ type Todo = {
   todo: string;
   createdat: Date;
   updatedat: Date;
+  isDone: boolean;
 };
 
 export const useGetTodos = () => {
@@ -24,7 +25,7 @@ export const useGetTodos = () => {
       .catch((err) => {
         console.log(err);
       });
-  }, [todos, doneTodos]);
+  }, []);
 
   useEffect(() => {
     axios
@@ -36,7 +37,7 @@ export const useGetTodos = () => {
       .catch((err) => {
         console.log(err);
       });
-  }, [todos, doneTodos]);
+  }, []);
 
   return { todos, doneTodos };
 };
