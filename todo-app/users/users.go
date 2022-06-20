@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"time"
+	"todo-app/auth"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
@@ -70,11 +71,20 @@ func (user *CreateUser) CreateUser(w http.ResponseWriter, r *http.Request) {
 	_, err2 := stmt.Exec(userData.Name, userData.Email, userData.PassWord, time.Now(), time.Now())
 	if err != nil {
 		log.Fatal(err2)
+	} else {
+		token, err := auth.CreateToken(email)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		tokenData := tokenRes{token}
+
+		w.Header().Set("Content-Type", "applicaiton/json")
+		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
+
+		json.NewEncoder(w).Encode(tokenData)
 	}
-
-	w.Header().Set("Content-Type", "applicaiton/json")
-
-	json.NewEncoder(w).Encode(userData)
 
 }
 

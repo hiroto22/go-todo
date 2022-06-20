@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"todo-app/auth"
 	"todo-app/todos"
 	"todo-app/users"
 
@@ -20,6 +21,7 @@ func main() {
 	r.HandleFunc("/completetodo", todos.DoneTodo)
 	r.HandleFunc("/gettodoList", todos.GetTodoList)
 	r.HandleFunc("/gettodo", todos.GetTodo)
+	r.HandleFunc("/token", auth.Test)
 	http.ListenAndServe(":8080", r)
 
 }

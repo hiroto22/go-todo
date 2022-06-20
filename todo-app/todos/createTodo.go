@@ -8,7 +8,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
+	"todo-app/auth"
 
 	"github.com/joho/godotenv"
 )
@@ -54,6 +56,14 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 	todo := data.Todo
 
 	todoData := Todo{todo, time.Now(), time.Now()}
+
+	tokenString := r.Header.Get("Authorization")
+	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
+
+	_, err2 := auth.TokenVerify(tokenString)
+	if err2 != nil {
+		log.Fatal(err)
+	}
 
 	stmt, err := db.Prepare("INSERT INTO todos (Todo,CreatedAt,UpdatedAt) VALUES(?,?,?)")
 	if err != nil {

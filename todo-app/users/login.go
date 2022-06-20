@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"time"
+	"todo-app/auth"
 
 	"github.com/joho/godotenv"
 )
@@ -20,6 +21,10 @@ type User struct {
 	PassWord  string    `json:"password"`
 	CreatedAt time.Time `json:"createdat"`
 	UpdatedAt time.Time `json:"updatedat"`
+}
+
+type tokenRes struct {
+	Token string `json:"token"`
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
@@ -54,8 +59,22 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	w.Header().Set("Content-Type", "applicaiton/json")
+	err = auth.PasswordVerify(user.PassWord, data.PassWord)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		token, err := auth.CreateToken(email)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	json.NewEncoder(w).Encode(user)
+		tokenData := tokenRes{token}
+
+		w.Header().Set("Content-Type", "applicaiton/json")
+		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
+
+		json.NewEncoder(w).Encode(tokenData)
+	}
 
 }

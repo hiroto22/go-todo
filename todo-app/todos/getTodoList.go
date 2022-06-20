@@ -7,7 +7,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
+	"todo-app/auth"
 
 	"github.com/joho/godotenv"
 )
@@ -34,6 +36,14 @@ func GetTodoList(w http.ResponseWriter, r *http.Request) {
 	defer db.Close()
 
 	isDone := r.URL.Query().Get("isdone")
+
+	tokenString := r.Header.Get("Authorization")
+	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
+
+	_, err2 := auth.TokenVerify(tokenString)
+	if err2 != nil {
+		log.Fatal(err)
+	}
 
 	rows, err := db.Query("SELECT * FROM todos WHERE IsDone=?", isDone)
 	if err != nil {
