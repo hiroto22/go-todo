@@ -24,6 +24,11 @@ type TodoList struct {
 }
 
 func GetTodoList(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "applicaiton/json")
+	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
+	w.Header().Set("Access-Control-Allow-Headers", "*")
+
 	e := godotenv.Load()
 	if e != nil {
 		log.Fatal(e)
@@ -40,51 +45,48 @@ func GetTodoList(w http.ResponseWriter, r *http.Request) {
 	tokenString := r.Header.Get("Authorization")
 	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
 
-	_, err2 := auth.TokenVerify(tokenString)
-	if err2 != nil {
-		log.Fatal(err)
-	}
-
-	rows, err := db.Query("SELECT * FROM todos WHERE IsDone=?", isDone)
+	token, err := auth.TokenVerify(tokenString)
+	log.Printf("request token=%s\n", token)
 	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer rows.Close()
-
-	var data []TodoList
-
-	for rows.Next() {
-		var todoList TodoList
-
-		err := rows.Scan(
-			&todoList.ID,
-			&todoList.UserID,
-			&todoList.Todo,
-			&todoList.CreatedAt,
-			&todoList.UpdatedAt,
-			&todoList.IsDone)
-
+		log.Println("")
+	} else {
+		rows, err := db.Query("SELECT * FROM todos WHERE IsDone=?", isDone)
 		if err != nil {
 			log.Fatal(err)
-		} else {
-			data = append(data, TodoList{
-				ID:        todoList.ID,
-				UserID:    todoList.UserID,
-				Todo:      todoList.Todo,
-				CreatedAt: todoList.CreatedAt,
-				UpdatedAt: todoList.UpdatedAt,
-				IsDone:    todoList.IsDone,
-			})
 		}
+
+		defer rows.Close()
+
+		var data []TodoList
+
+		for rows.Next() {
+			var todoList TodoList
+
+			err := rows.Scan(
+				&todoList.ID,
+				&todoList.UserID,
+				&todoList.Todo,
+				&todoList.CreatedAt,
+				&todoList.UpdatedAt,
+				&todoList.IsDone)
+
+			if err != nil {
+				log.Fatal(err)
+			} else {
+				data = append(data, TodoList{
+					ID:        todoList.ID,
+					UserID:    todoList.UserID,
+					Todo:      todoList.Todo,
+					CreatedAt: todoList.CreatedAt,
+					UpdatedAt: todoList.UpdatedAt,
+					IsDone:    todoList.IsDone,
+				})
+			}
+		}
+
+		// jsonData, _ := json.Marshal(data)
+
+		json.NewEncoder(w).Encode(data)
 	}
-
-	// jsonData, _ := json.Marshal(data)
-
-	w.Header().Set("Content-Type", "applicaiton/json")
-	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
-	w.Header().Set("Access-Control-Allow-Credentials", "true")
-
-	json.NewEncoder(w).Encode(data)
 
 }

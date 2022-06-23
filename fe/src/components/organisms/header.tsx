@@ -8,7 +8,14 @@ export const Header = () => {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             Todo
           </Typography>
-          <Button color="inherit">Login</Button>
+          <Button
+            color="inherit"
+            onClick={() => {
+              sessionStorage.removeItem("token");
+            }}
+          >
+            Logout
+          </Button>
         </Toolbar>
       </AppBar>
     </Box>

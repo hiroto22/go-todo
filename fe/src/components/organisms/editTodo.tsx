@@ -5,34 +5,38 @@ import { useCompleteTodo } from "../../hooks/useCompleteTodo";
 import { useEditTodo } from "../../hooks/useEditTodo";
 import { editTodoState } from "../../state/editTodoState";
 import { BaseButton } from "../atoms/baseButton";
+import { TextArea } from "../atoms/textArea";
 
 export const EditTodo = () => {
+  const token = "Bearer " + sessionStorage.getItem("token");
+
   const location = useLocation();
   console.log(location.state);
   const [todo, setTodo] = useRecoilState(editTodoState);
   const editTodo = useEditTodo();
   const onChangeTodo: ChangeEventHandler<HTMLTextAreaElement> = (e: any) => {
-    editTodo(todo.id, e.target.value);
+    editTodo(token, todo.id, e.target.value);
   };
   const { CompleteTodo, ReturnTodo, DeleteTodo } = useCompleteTodo();
   const navigate = useNavigate();
+  console.log(todo);
 
   return (
     <div>
-      <textarea onChange={onChangeTodo} defaultValue={todo.todo}></textarea>
+      <TextArea onChange={onChangeTodo} defaultValue={todo.todo}></TextArea>
       {todo.isComplete ? (
         <div>
           <BaseButton
             text="タスクに戻す"
             onClick={() => {
-              ReturnTodo(todo.id);
+              ReturnTodo(token, todo.id);
               navigate("/");
             }}
           />
           <BaseButton
             text="削除"
             onClick={() => {
-              DeleteTodo(todo.id);
+              DeleteTodo(token, todo.id);
               navigate("/");
             }}
           />
@@ -42,14 +46,14 @@ export const EditTodo = () => {
           <BaseButton
             text="タスク完了"
             onClick={() => {
-              CompleteTodo(todo.id);
+              CompleteTodo(token, todo.id);
               navigate("/");
             }}
           />
           <BaseButton
             text="削除"
             onClick={() => {
-              DeleteTodo(todo.id);
+              DeleteTodo(token, todo.id);
               navigate("/");
             }}
           />

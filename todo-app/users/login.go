@@ -23,6 +23,10 @@ type User struct {
 	UpdatedAt time.Time `json:"updatedat"`
 }
 
+type LoginState struct {
+	Email    string `json:"email"`
+	PassWord string `json:"password"`
+}
 type tokenRes struct {
 	Token string `json:"token"`
 }
@@ -44,7 +48,9 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	var data CreateUserBody
+	log.Printf("request body=%s\n", r.Body)
+
+	var data LoginState
 	if err := json.Unmarshal(body, &data); err != nil {
 		log.Fatal(err)
 	}

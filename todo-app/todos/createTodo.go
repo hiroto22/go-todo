@@ -27,6 +27,16 @@ type TodoBody struct {
 }
 
 func CreateTodo(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "*")
+	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+	switch r.Method {
+	case "OPTIONS":
+		w.Header().Set("Access-Control-Allow-Headers", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		return
+	}
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
+
 	e := godotenv.Load()
 	if e != nil {
 		log.Fatal(e)
@@ -38,18 +48,23 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
+	tokenString := r.Header.Get("Authorization")
+	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
+
+	log.Printf("request token=%s\n", tokenString)
+
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Fatal(err)
 
 	}
 
-	log.Printf("request body=%s\n", r.Body)
+	log.Printf("request body=%s\n", body)
 
 	var data TodoBody
 
 	if err := json.Unmarshal(body, &data); err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	// userId := 12
@@ -57,30 +72,21 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 
 	todoData := Todo{todo, time.Now(), time.Now()}
 
-	tokenString := r.Header.Get("Authorization")
-	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
-
 	_, err2 := auth.TokenVerify(tokenString)
 	if err2 != nil {
 		log.Fatal(err)
+	} else {
+
+		stmt, err := db.Prepare("INSERT INTO todos (Todo,CreatedAt,UpdatedAt) VALUES(?,?,?)")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		_, err = stmt.Exec(todoData.Todo, todoData.CreatedAt, todoData.UpdatedAt)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		json.NewEncoder(w).Encode(todoData)
 	}
-
-	stmt, err := db.Prepare("INSERT INTO todos (Todo,CreatedAt,UpdatedAt) VALUES(?,?,?)")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	_, err = stmt.Exec(todoData.Todo, todoData.CreatedAt, todoData.UpdatedAt)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	w.Header().Set("Content-Type", "applicaiton/json")
-	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
-	w.Header().Set("Access-Control-Allow-Credentials", "true")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-	w.Header().Set("Access-Control-Allow-Methods", "POST")
-
-	json.NewEncoder(w).Encode(todoData)
-
 }

@@ -14,6 +14,11 @@ import (
 )
 
 func GetTodo(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Content-Type", "applicaiton/json")
+	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
+
 	e := godotenv.Load()
 	if e != nil {
 		log.Fatal(e)
@@ -33,26 +38,23 @@ func GetTodo(w http.ResponseWriter, r *http.Request) {
 	_, err2 := auth.TokenVerify(tokenString)
 	if err2 != nil {
 		log.Fatal(err)
+	} else {
+
+		var todo TodoList
+
+		err = db.QueryRow("SELECT * FROM todos WHERE ID=?", id).Scan(
+			&todo.ID,
+			&todo.UserID,
+			&todo.Todo,
+			&todo.CreatedAt,
+			&todo.UpdatedAt,
+			&todo.IsDone,
+		)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		json.NewEncoder(w).Encode(todo)
 	}
-
-	var todo TodoList
-
-	err = db.QueryRow("SELECT * FROM todos WHERE ID=?", id).Scan(
-		&todo.ID,
-		&todo.UserID,
-		&todo.Todo,
-		&todo.CreatedAt,
-		&todo.UpdatedAt,
-		&todo.IsDone,
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	w.Header().Set("Content-Type", "applicaiton/json")
-	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
-	w.Header().Set("Access-Control-Allow-Credentials", "true")
-
-	json.NewEncoder(w).Encode(todo)
 
 }
