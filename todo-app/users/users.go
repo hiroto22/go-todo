@@ -68,11 +68,12 @@ func (user *CreateUser) CreateUser(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	_, err2 := stmt.Exec(userData.Name, userData.Email, userData.PassWord, time.Now(), time.Now())
+	res, err2 := stmt.Exec(userData.Name, userData.Email, userData.PassWord, time.Now(), time.Now())
 	if err != nil {
 		log.Fatal(err2)
 	} else {
-		token, err := auth.CreateToken(email)
+		fmt.Println(res)
+		token, err := auth.CreateToken(1)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -85,7 +86,6 @@ func (user *CreateUser) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 		json.NewEncoder(w).Encode(tokenData)
 	}
-
 }
 
 func NewCreateUser() *CreateUser {

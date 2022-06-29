@@ -69,7 +69,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		token, err := auth.CreateToken(email)
+		token, err := auth.CreateToken(user.ID)
 		if err != nil {
 			log.Fatal(err)
 		}

@@ -11,7 +11,7 @@ type Todo = {
 };
 
 export const useGetTodos = (token: string) => {
-  const URL = "http://127.0.0.1:8080/gettodoList";
+  const URL = "http://localhost:8080/get-usertodoList";
   const [todos, setTodos] = useState<Todo[]>([]);
   const [doneTodos, setDoneTodos] = useState<Todo[]>([]);
 

@@ -12,18 +12,20 @@ import (
 	"time"
 	"todo-app/auth"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/joho/godotenv"
 )
 
 type Todo struct {
+	Todo string `json:"todo"`
 	// UserID    int       `json:"userid"`
-	Todo      string    `json:"todo"`
 	CreatedAt time.Time `json:"createdat"`
 	UpdatedAt time.Time `json:"updatedat"`
 }
 
 type TodoBody struct {
-	Todo string `json:"todo"`
+	Todo   string `json:"todo"`
+	UserID int    `json:"userid,string"`
 }
 
 func CreateTodo(w http.ResponseWriter, r *http.Request) {
@@ -68,7 +70,19 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// userId := 12
+	secretKey := os.Getenv("SECURITY_KEY")
 	todo := data.Todo
+	claims := jwt.MapClaims{}
+	_, err = jwt.ParseWithClaims(tokenString, claims, func(userid *jwt.Token) (interface{}, error) {
+		return []byte(secretKey), nil
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	// do something with decoded claims
+
+	fmt.Println(claims["userid"])
+	userID := claims["userid"]
 
 	todoData := Todo{todo, time.Now(), time.Now()}
 
@@ -77,12 +91,12 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	} else {
 
-		stmt, err := db.Prepare("INSERT INTO todos (Todo,CreatedAt,UpdatedAt) VALUES(?,?,?)")
+		stmt, err := db.Prepare("INSERT INTO todos (Todo,UserID,CreatedAt,UpdatedAt) VALUES(?,?,?,?)")
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		_, err = stmt.Exec(todoData.Todo, todoData.CreatedAt, todoData.UpdatedAt)
+		_, err = stmt.Exec(todoData.Todo, userID, todoData.CreatedAt, todoData.UpdatedAt)
 		if err != nil {
 			log.Fatal(err)
 		}
