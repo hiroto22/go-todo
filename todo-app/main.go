@@ -2,6 +2,8 @@ package main
 
 import (
 	"net/http"
+	"os"
+	"todo-app/controlar"
 	"todo-app/todos"
 	"todo-app/users"
 
@@ -10,6 +12,7 @@ import (
 )
 
 func main() {
+	controlar.CreateDb()
 	r := mux.NewRouter()
 	user := users.NewCreateUser()
 	r.HandleFunc("/createuser", user.CreateUser)
@@ -21,6 +24,6 @@ func main() {
 	r.HandleFunc("/gettodoList", todos.GetTodoList)
 	r.HandleFunc("/get-usertodoList", todos.GetTodoListWithUserId)
 	r.HandleFunc("/gettodo", todos.GetTodo)
-	http.ListenAndServe(":8080", r)
+	http.ListenAndServe(":"+os.Getenv("PORT"), r)
 
 }
