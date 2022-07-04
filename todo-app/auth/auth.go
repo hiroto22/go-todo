@@ -32,7 +32,7 @@ func Test(w http.ResponseWriter, r *http.Request) {
 
 	id := data.Id
 
-	token, err := CreateToken(string(id))
+	token, err := CreateToken(id)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -47,13 +47,13 @@ func Test(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func CreateToken(email string) (string, error) {
+func CreateToken(userid int) (string, error) {
 
 	token := jwt.New(jwt.GetSigningMethod("HS256"))
 
 	token.Claims = jwt.MapClaims{
-		"email": email,
-		"exp":   time.Now().Add(time.Hour * 1).Unix(),
+		"userid": userid,
+		"exp":    time.Now().Add(time.Hour * 1).Unix(),
 	}
 
 	var secretKey = "gotodo"

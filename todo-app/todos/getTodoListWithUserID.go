@@ -11,10 +11,11 @@ import (
 	"time"
 	"todo-app/auth"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/joho/godotenv"
 )
 
-type TodoList struct {
+type TodoListWithUserID struct {
 	ID        int           `json:"id"`
 	UserID    sql.NullInt64 `json:"userid"`
 	Todo      string        `json:"todo"`
@@ -23,9 +24,15 @@ type TodoList struct {
 	IsDone    bool          `json:"isdone"`
 }
 
-func GetTodoList(w http.ResponseWriter, r *http.Request) {
+func GetTodoListWithUserId(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "applicaiton/json")
 	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+	switch r.Method {
+	case "OPTIONS":
+		w.Header().Set("Access-Control-Allow-Headers", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		return
+	}
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("Access-Control-Allow-Headers", "*")
 
@@ -45,19 +52,33 @@ func GetTodoList(w http.ResponseWriter, r *http.Request) {
 	tokenString := r.Header.Get("Authorization")
 	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
 
+	var secretKey = "gotodo"
+
+	claims := jwt.MapClaims{}
+	_, err = jwt.ParseWithClaims(tokenString, claims, func(userid *jwt.Token) (interface{}, error) {
+		return []byte(secretKey), nil
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	// do something with decoded claims
+
+	fmt.Println(claims["userid"])
+	userID := claims["userid"]
+
 	token, err := auth.TokenVerify(tokenString)
 	log.Printf("request token=%s\n", token)
 	if err != nil {
 		log.Println("")
 	} else {
-		rows, err := db.Query("SELECT * FROM todos WHERE IsDone=?", isDone)
+		rows, err := db.Query("SELECT * FROM todos WHERE IsDone=? AND UserID=?", isDone, userID)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		defer rows.Close()
 
-		var data []TodoList
+		var data []TodoListWithUserID
 
 		for rows.Next() {
 			var todoList TodoList
@@ -73,7 +94,7 @@ func GetTodoList(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				log.Fatal(err)
 			} else {
-				data = append(data, TodoList{
+				data = append(data, TodoListWithUserID{
 					ID:        todoList.ID,
 					UserID:    todoList.UserID,
 					Todo:      todoList.Todo,

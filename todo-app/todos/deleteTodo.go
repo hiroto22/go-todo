@@ -7,8 +7,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
-	"todo-app/auth"
 
 	"github.com/joho/godotenv"
 )
@@ -27,13 +25,13 @@ func DeleteTodo(w http.ResponseWriter, r *http.Request) {
 
 	id := r.URL.Query().Get("id")
 
-	tokenString := r.Header.Get("Authorization")
-	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
+	// tokenString := r.Header.Get("Authorization")
+	// tokenString = strings.TrimPrefix(tokenString, "Bearer ")
 
-	_, err2 := auth.TokenVerify(tokenString)
-	if err2 != nil {
-		log.Fatal(err)
-	}
+	// _, err2 := auth.TokenVerify(tokenString)
+	// if err2 != nil {
+	// 	log.Fatal(err)
+	// }
 
 	stmt, err := db.Prepare("DELETE FROM todos WHERE ID=?")
 	if err != nil {

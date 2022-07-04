@@ -21,6 +21,15 @@ type EditTodoBody struct {
 }
 
 func EditTodo(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "*")
+	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+	switch r.Method {
+	case "OPTIONS":
+		w.Header().Set("Access-Control-Allow-Headers", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		return
+	}
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
 	e := godotenv.Load()
 	if e != nil {
 		log.Fatal(e)
@@ -52,24 +61,19 @@ func EditTodo(w http.ResponseWriter, r *http.Request) {
 	_, err2 := auth.TokenVerify(tokenString)
 	if err2 != nil {
 		log.Fatal(err)
+	} else {
+
+		stmt, err := db.Prepare("UPDATE todos set Todo=?, UpdatedAt=? WHERE ID=?")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		_, err = stmt.Exec(editData.Todo, editData.UpdatedAt, id)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		json.NewEncoder(w).Encode(editData)
 	}
-
-	stmt, err := db.Prepare("UPDATE todos set Todo=?, UpdatedAt=? WHERE ID=?")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	_, err = stmt.Exec(editData.Todo, editData.UpdatedAt, id)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	w.Header().Set("Content-Type", "applicaiton/json")
-	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
-	w.Header().Set("Access-Control-Allow-Credentials", "true")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-	w.Header().Set("Access-Control-Allow-Methods", "POST")
-
-	json.NewEncoder(w).Encode(editData)
 
 }

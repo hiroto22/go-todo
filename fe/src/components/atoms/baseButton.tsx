@@ -1,9 +1,8 @@
 import { Button } from "@mui/material";
-import styled from "styled-components";
 
 type onClickBaseButton = {
   text: string;
-  onClick: any;
+  onClick: React.MouseEventHandler<HTMLButtonElement>;
 };
 
 export const BaseButton = (props: onClickBaseButton) => {

@@ -14,6 +14,16 @@ import (
 )
 
 func DoneTodo(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "*")
+	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+	switch r.Method {
+	case "OPTIONS":
+		w.Header().Set("Access-Control-Allow-Headers", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		return
+	}
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
+
 	e := godotenv.Load()
 	if e != nil {
 		log.Fatal(e)
@@ -31,32 +41,31 @@ func DoneTodo(w http.ResponseWriter, r *http.Request) {
 	tokenString := r.Header.Get("Authorization")
 	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
 
+	log.Printf("request token=%s\n", id)
+
 	_, err2 := auth.TokenVerify(tokenString)
 	if err2 != nil {
-		log.Fatal(err)
-	}
-
-	stmt, err := db.Prepare("UPDATE todos set IsDone=? WHERE ID=?")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if isComplete == "false" {
-		_, err = stmt.Exec(true, id)
-		if err != nil {
-			log.Fatal(err)
-		}
+		log.Println("tokenはありません。")
 	} else {
-		_, err = stmt.Exec(false, id)
+
+		stmt, err := db.Prepare("UPDATE todos set IsDone=? WHERE ID=?")
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		if isComplete == "false" {
+			_, err = stmt.Exec(true, id)
+			if err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			_, err = stmt.Exec(false, id)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+
+		json.NewEncoder(w).Encode(id)
 	}
-
-	w.Header().Set("Content-Type", "applicaiton/json")
-	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
-	w.Header().Set("Access-Control-Allow-Credentials", "true")
-
-	json.NewEncoder(w).Encode(id)
 
 }

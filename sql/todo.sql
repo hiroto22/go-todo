@@ -9,4 +9,5 @@ CREATE TABLE IF NOT EXISTS `todos`(
      PRIMARY KEY(id)
 );
 
+
 DESC todos

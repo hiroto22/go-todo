@@ -5,18 +5,20 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRecoilState } from "recoil";
 import { useCompleteTodo } from "../../hooks/useCompleteTodo";
+import { useGetStorageToken } from "../../hooks/useGetStorageToken";
 import { useGetTodos } from "../../hooks/useGetTodos";
 import { editTodoState } from "../../state/editTodoState";
 import { TodoCard } from "../molecules/todoCard";
 import { TodoTab } from "../molecules/todoTab";
 
 export const Todos = () => {
-  const { todos, doneTodos } = useGetTodos();
   const { CompleteTodo, ReturnTodo, DeleteTodo } = useCompleteTodo();
   const [todo, setTodo] = useRecoilState(editTodoState);
   const [tabValue, setTabValue] = useState("1");
   const navigate = useNavigate();
-  console.log(todos);
+  const token = "Bearer " + sessionStorage.getItem("token");
+  const { todos, doneTodos } = useGetTodos(token);
+  console.log(token);
 
   return (
     <div>
@@ -43,8 +45,8 @@ export const Todos = () => {
                         todo={res.todo}
                         text="完了"
                         text2="削除"
-                        onClick={() => CompleteTodo(res.id)}
-                        onClick2={() => DeleteTodo(res.id)}
+                        onClick={() => CompleteTodo(token, res.id)}
+                        onClick2={() => DeleteTodo(token, res.id)}
                         onClickCard={async () => {
                           await setTodo({
                             id: res.id,
@@ -70,8 +72,8 @@ export const Todos = () => {
                         todo={res.todo}
                         text="戻す"
                         text2="削除"
-                        onClick={() => ReturnTodo(res.id)}
-                        onClick2={() => DeleteTodo(res.id)}
+                        onClick={() => ReturnTodo(token, res.id)}
+                        onClick2={() => DeleteTodo(token, res.id)}
                         onClickCard={async () => {
                           await setTodo({
                             id: res.id,

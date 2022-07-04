@@ -10,4 +10,7 @@ CREATE TABLE IF NOT EXISTS `users`(
      PRIMARY KEY(id)
 );
 
-DESC users
+SELECT * FROM users;
+
+
+-- DESC users
