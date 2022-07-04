@@ -6,6 +6,7 @@ import { TopPage } from "./pages/topPage";
 import { AddTodoPage } from "./pages/addTodoPage";
 import { EditTodoPage } from "./pages/editTodoPage";
 import { LoginPage } from "./pages/loginPage";
+import { SignUpPage } from "./pages/signUpPage";
 
 const App = () => {
   return (
@@ -14,6 +15,7 @@ const App = () => {
         <Route path="/" element={<TopPage />} />
         <Route path="/addtodo" element={<AddTodoPage />} />
         <Route path="edit-todo" element={<EditTodoPage />} />
+        <Route path="/signup" element={<SignUpPage />} />
         <Route path="/login" element={<LoginPage />} />
       </Routes>
     </RecoilRoot>

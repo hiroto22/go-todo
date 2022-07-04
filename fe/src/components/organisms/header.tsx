@@ -1,6 +1,8 @@
 import { AppBar, Box, Button, Toolbar, Typography } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 export const Header = () => {
+  const navigate = useNavigate();
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static" sx={{ backgroundColor: "#0277bd" }}>
@@ -10,8 +12,9 @@ export const Header = () => {
           </Typography>
           <Button
             color="inherit"
-            onClick={() => {
-              sessionStorage.removeItem("token");
+            onClick={async () => {
+              await sessionStorage.removeItem("token");
+              navigate("/login");
             }}
           >
             Logout

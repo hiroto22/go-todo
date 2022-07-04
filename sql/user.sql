@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS `users`(
      PRIMARY KEY(id)
 );
 
-SELECT * FROM todos;
+SELECT * FROM users;
 
 
 -- DESC users
