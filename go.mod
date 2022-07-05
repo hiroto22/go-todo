@@ -1,4 +1,4 @@
-module todo-app
+module todo-22-app
 
 go 1.18
 
