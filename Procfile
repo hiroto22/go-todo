@@ -1,1 +1,1 @@
-web: bin/todo-22-app
+web: todo-22-app
