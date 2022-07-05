@@ -1,1 +1,1 @@
-web: go-todo
+web: todo-22-app
