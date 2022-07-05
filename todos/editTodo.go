@@ -9,7 +9,7 @@ import (
 	"os"
 	"strings"
 	"time"
-	"todo-app/auth"
+	"todo-22-app/auth"
 
 	"github.com/joho/godotenv"
 )

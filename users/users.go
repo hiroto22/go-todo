@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"os"
 	"time"
-	"todo-app/auth"
+	"todo-22-app/auth"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"

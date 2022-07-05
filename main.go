@@ -3,9 +3,9 @@ package main
 import (
 	"net/http"
 	"os"
-	"todo-app/controlar"
-	"todo-app/todos"
-	"todo-app/users"
+	"todo-22-app/controlar"
+	"todo-22-app/todos"
+	"todo-22-app/users"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
