@@ -13,6 +13,7 @@ import (
 
 func main() {
 	controlar.CreateDb()
+
 	r := mux.NewRouter()
 	user := users.NewCreateUser()
 	r.HandleFunc("/createuser", user.CreateUser)
