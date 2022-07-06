@@ -65,24 +65,24 @@ func (user *CreateUser) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	stmt, err := db.Prepare("INSERT INTO users (Name,Email,PassWord,CreatedAt,UpdatedAt) VALUES(?,?,?,?,?)")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	_, err2 := stmt.Exec(userData.Name, userData.Email, userData.PassWord, time.Now(), time.Now())
 	if err != nil {
-		log.Fatal(err2)
+		log.Println(err2)
 	}
 
 	var userd User
 
 	err = db.QueryRow("SELECT * FROM users WHERE Email=?", email).Scan(&userd.ID, &userd.Name, &userd.Email, &userd.PassWord, &userd.CreatedAt, &userd.UpdatedAt)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	token, err := auth.CreateToken(userd.ID)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	tokenData := tokenRes{token}

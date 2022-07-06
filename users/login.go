@@ -63,7 +63,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	err = db.QueryRow("SELECT * FROM users WHERE Email=?", email).Scan(&user.ID, &user.Name, &user.Email, &user.PassWord, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	err = auth.PasswordVerify(user.PassWord, data.PassWord)
@@ -72,7 +72,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	} else {
 		token, err := auth.CreateToken(user.ID)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 
 		tokenData := tokenRes{token}
