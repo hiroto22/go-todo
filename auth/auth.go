@@ -18,7 +18,7 @@ type CreateTokenState struct {
 func Test(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 
 	}
 
@@ -27,14 +27,14 @@ func Test(w http.ResponseWriter, r *http.Request) {
 	var data CreateTokenState
 
 	if err := json.Unmarshal(body, &data); err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	id := data.Id
 
 	token, err := CreateToken(id)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	w.Header().Set("Content-Type", "applicaiton/json")

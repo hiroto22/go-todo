@@ -31,13 +31,13 @@ func EditTodo(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
 	e := godotenv.Load()
 	if e != nil {
-		log.Fatal(e)
+		log.Println(e)
 	}
 	// dbConnectionInfo := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/go_todo", os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"))
 	dbConnectionInfo := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("mysql", dbConnectionInfo)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	defer db.Close()
 
@@ -45,12 +45,12 @@ func EditTodo(w http.ResponseWriter, r *http.Request) {
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	var data EditTodoBody
 	if err := json.Unmarshal(body, &data); err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	editData := EditTodoBody{data.Todo, time.Now()}
@@ -60,17 +60,17 @@ func EditTodo(w http.ResponseWriter, r *http.Request) {
 
 	_, err2 := auth.TokenVerify(tokenString)
 	if err2 != nil {
-		log.Fatal(err)
+		log.Println(err)
 	} else {
 
 		stmt, err := db.Prepare("UPDATE todos set Todo=?, UpdatedAt=? WHERE ID=?")
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 
 		_, err = stmt.Exec(editData.Todo, editData.UpdatedAt, id)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 
 		json.NewEncoder(w).Encode(editData)

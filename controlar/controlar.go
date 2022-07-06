@@ -12,13 +12,13 @@ import (
 func CreateDb() {
 	e := godotenv.Load()
 	if e != nil {
-		log.Fatal(e)
+		log.Println(e)
 	}
 	// dbConnectionInfo := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/track_test", os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"))
 	dbConnectionInfo := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("mysql", dbConnectionInfo)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	defer db.Close()
 
@@ -32,7 +32,7 @@ func CreateDb() {
 		"PRIMARY KEY(id))")
 
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS `todos`(" +
@@ -44,7 +44,7 @@ func CreateDb() {
 		"PRIMARY KEY(id))")
 
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	defer db.Close()
 

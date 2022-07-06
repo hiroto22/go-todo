@@ -20,13 +20,13 @@ func GetTodo(w http.ResponseWriter, r *http.Request) {
 
 	e := godotenv.Load()
 	if e != nil {
-		log.Fatal(e)
+		log.Println(e)
 	}
 	// dbConnectionInfo := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/go_todo?parseTime=true", os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"))
 	dbConnectionInfo := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("mysql", dbConnectionInfo)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	defer db.Close()
 
@@ -37,7 +37,7 @@ func GetTodo(w http.ResponseWriter, r *http.Request) {
 
 	_, err2 := auth.TokenVerify(tokenString)
 	if err2 != nil {
-		log.Fatal(err)
+		log.Println(err)
 	} else {
 
 		var todo TodoList
@@ -51,7 +51,7 @@ func GetTodo(w http.ResponseWriter, r *http.Request) {
 			&todo.IsDone,
 		)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 
 		json.NewEncoder(w).Encode(todo)

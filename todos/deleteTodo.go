@@ -13,13 +13,13 @@ import (
 func DeleteTodo(w http.ResponseWriter, r *http.Request) {
 	e := godotenv.Load()
 	if e != nil {
-		log.Fatal(e)
+		log.Println(e)
 	}
 	// dbConnectionInfo := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/go_todo", os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"))
 	dbConnectionInfo := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("mysql", dbConnectionInfo)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	defer db.Close()
 
@@ -30,17 +30,17 @@ func DeleteTodo(w http.ResponseWriter, r *http.Request) {
 
 	// _, err2 := auth.TokenVerify(tokenString)
 	// if err2 != nil {
-	// 	log.Fatal(err)
+	// 	log.Println(err)
 	// }
 
 	stmt, err := db.Prepare("DELETE FROM todos WHERE ID=?")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	_, err = stmt.Exec(id)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	w.Header().Set("Content-Type", "applicaiton/json")

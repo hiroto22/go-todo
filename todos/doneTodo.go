@@ -25,13 +25,13 @@ func DoneTodo(w http.ResponseWriter, r *http.Request) {
 
 	e := godotenv.Load()
 	if e != nil {
-		log.Fatal(e)
+		log.Println(e)
 	}
 	// dbConnectionInfo := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/go_todo", os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"))
 	dbConnectionInfo := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("mysql", dbConnectionInfo)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	defer db.Close()
 
@@ -50,18 +50,18 @@ func DoneTodo(w http.ResponseWriter, r *http.Request) {
 
 		stmt, err := db.Prepare("UPDATE todos set IsDone=? WHERE ID=?")
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 
 		if isComplete == "false" {
 			_, err = stmt.Exec(true, id)
 			if err != nil {
-				log.Fatal(err)
+				log.Println(err)
 			}
 		} else {
 			_, err = stmt.Exec(false, id)
 			if err != nil {
-				log.Fatal(err)
+				log.Println(err)
 			}
 		}
 
