@@ -38,13 +38,13 @@ func GetTodoListWithUserId(w http.ResponseWriter, r *http.Request) {
 
 	e := godotenv.Load()
 	if e != nil {
-		log.Println(e)
+		log.Fatal(e)
 	}
 	// dbConnectionInfo := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/go_todo?parseTime=true", os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"))
 	dbConnectionInfo := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("mysql", dbConnectionInfo)
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 	}
 	defer db.Close()
 
@@ -60,7 +60,7 @@ func GetTodoListWithUserId(w http.ResponseWriter, r *http.Request) {
 		return []byte(secretKey), nil
 	})
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 	}
 	// do something with decoded claims
 
@@ -70,11 +70,11 @@ func GetTodoListWithUserId(w http.ResponseWriter, r *http.Request) {
 	token, err := auth.TokenVerify(tokenString)
 	log.Printf("request token=%s\n", token)
 	if err != nil {
-		log.Println("")
+		log.Fatal("")
 	} else {
 		rows, err := db.Query("SELECT * FROM todos WHERE IsDone=? AND UserID=?", isDone, userID)
 		if err != nil {
-			log.Println(err)
+			log.Fatal(err)
 		}
 
 		defer rows.Close()
@@ -93,7 +93,7 @@ func GetTodoListWithUserId(w http.ResponseWriter, r *http.Request) {
 				&todoList.IsDone)
 
 			if err != nil {
-				log.Println(err)
+				log.Fatal(err)
 			} else {
 				data = append(data, TodoListWithUserID{
 					ID:        todoList.ID,
