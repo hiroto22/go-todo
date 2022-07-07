@@ -11,6 +11,17 @@ import (
 )
 
 func DeleteTodo(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Content-Type", "applicaiton/json")
+	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+	switch r.Method {
+	case "OPTIONS":
+		w.Header().Set("Access-Control-Allow-Headers", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		return
+	}
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
+
 	e := godotenv.Load()
 	if e != nil {
 		log.Println(e)
@@ -42,10 +53,6 @@ func DeleteTodo(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 	}
-
-	w.Header().Set("Content-Type", "applicaiton/json")
-	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
-	w.Header().Set("Access-Control-Allow-Credentials", "true")
 
 	json.NewEncoder(w).Encode(id)
 

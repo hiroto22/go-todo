@@ -30,6 +30,18 @@ type CreateUserBody struct {
 }
 
 func (user *CreateUser) CreateUser(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Content-Type", "applicaiton/json")
+	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+	switch r.Method {
+	case "OPTIONS":
+		w.Header().Set("Access-Control-Allow-Headers", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		return
+	}
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
+	w.Header().Set("Access-Control-Allow-Headers", "*")
+
 	e := godotenv.Load()
 	if e != nil {
 		log.Fatal(e)
@@ -86,10 +98,6 @@ func (user *CreateUser) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tokenData := tokenRes{token}
-
-	w.Header().Set("Content-Type", "applicaiton/json")
-	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
-	w.Header().Set("Access-Control-Allow-Credentials", "true")
 
 	json.NewEncoder(w).Encode(tokenData)
 
