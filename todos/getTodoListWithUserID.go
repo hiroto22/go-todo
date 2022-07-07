@@ -34,7 +34,6 @@ func GetTodoListWithUserId(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
-	w.Header().Set("Access-Control-Allow-Headers", "*")
 
 	e := godotenv.Load()
 	if e != nil {
@@ -53,7 +52,7 @@ func GetTodoListWithUserId(w http.ResponseWriter, r *http.Request) {
 	tokenString := r.Header.Get("Authorization")
 	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
 
-	var secretKey = os.Getenv(("SECURITY_KEY"))
+	var secretKey = os.Getenv("SECURITY_KEY")
 
 	claims := jwt.MapClaims{}
 	_, err = jwt.ParseWithClaims(tokenString, claims, func(userid *jwt.Token) (interface{}, error) {
