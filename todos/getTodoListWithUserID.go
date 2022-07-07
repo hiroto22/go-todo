@@ -26,7 +26,7 @@ type TodoListWithUserID struct {
 
 func GetTodoListWithUserId(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "applicaiton/json")
-	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000/")
 	switch r.Method {
 	case "OPTIONS":
 		w.Header().Set("Access-Control-Allow-Headers", "*")
@@ -53,7 +53,7 @@ func GetTodoListWithUserId(w http.ResponseWriter, r *http.Request) {
 	tokenString := r.Header.Get("Authorization")
 	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
 
-	var secretKey = "gotodo"
+	var secretKey = os.Getenv(("SECURITY_KEY"))
 
 	claims := jwt.MapClaims{}
 	_, err = jwt.ParseWithClaims(tokenString, claims, func(userid *jwt.Token) (interface{}, error) {
