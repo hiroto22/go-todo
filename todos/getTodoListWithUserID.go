@@ -34,6 +34,7 @@ func GetTodoListWithUserId(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
+	w.Header().Set("Access-Control-Allow-Headers", "*")
 
 	e := godotenv.Load()
 	if e != nil {
