@@ -15,7 +15,7 @@ import (
 func GetTodo(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "applicaiton/json")
-	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+	w.Header().Set("Access-Control-Allow-Origin", "https://todo-22-front.herokuapp.com")
 	switch r.Method {
 	case "OPTIONS":
 		w.Header().Set("Access-Control-Allow-Headers", "*")
