@@ -26,7 +26,7 @@ type TodoListWithUserID struct {
 
 func GetTodoListWithUserId(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "https://todo-22-front.herokuapp.com")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	switch r.Method {
 	case "OPTIONS":
 		w.Header().Set("Access-Control-Allow-Headers", "Authorization")
