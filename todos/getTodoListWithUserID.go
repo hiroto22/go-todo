@@ -53,11 +53,11 @@ func GetTodoListWithUserId(w http.ResponseWriter, r *http.Request) {
 	tokenString := r.Header.Get("Authorization")
 	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
 
-	var secretKey = os.Getenv("SECURITY_KEY")
+	// var secretKey = os.Getenv("SECURITY_KEY")
 
 	claims := jwt.MapClaims{}
 	_, err = jwt.ParseWithClaims(tokenString, claims, func(userid *jwt.Token) (interface{}, error) {
-		return []byte(secretKey), nil
+		return []byte("gotodo"), nil
 	})
 	if err != nil {
 		log.Println(err)
