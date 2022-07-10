@@ -69,8 +69,9 @@ func GetTodoListWithUserId(w http.ResponseWriter, r *http.Request) {
 
 	token, err := auth.TokenVerify(tokenString)
 	log.Printf("request token=%s\n", token)
+
 	if err != nil {
-		log.Println("")
+		log.Println(err)
 	} else {
 		rows, err := db.Query("SELECT * FROM todos WHERE IsDone=? AND UserID=?", isDone, userID)
 		if err != nil {
