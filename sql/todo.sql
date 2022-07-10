@@ -9,5 +9,5 @@ CREATE TABLE IF NOT EXISTS `todos`(
      PRIMARY KEY(id)
 );
 
-
+SELECT * FROM todos;
 DESC todos

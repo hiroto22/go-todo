@@ -41,6 +41,7 @@ func CreateDb() {
 		"Todo text NOT NULL," +
 		"CreatedAt datetime," +
 		"UpdatedAt datetime," +
+		"isDone boolean," +
 		"PRIMARY KEY(id))")
 
 	if err != nil {
