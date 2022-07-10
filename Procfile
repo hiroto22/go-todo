@@ -1,1 +1,1 @@
-web: todo-22-app
+web: go run main.go
