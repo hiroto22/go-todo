@@ -38,7 +38,7 @@ func GetTodoListWithUserId(w http.ResponseWriter, r *http.Request) {
 
 	e := godotenv.Load()
 	if e != nil {
-		log.Println(e)
+		log.Fatal(e)
 	}
 	// dbConnectionInfo := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/go_todo?parseTime=true", os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"))
 	dbConnectionInfo := os.Getenv("DATABASE_URL")
@@ -53,11 +53,11 @@ func GetTodoListWithUserId(w http.ResponseWriter, r *http.Request) {
 	tokenString := r.Header.Get("Authorization")
 	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
 
-	// var secretKey = os.Getenv("SECURITY_KEY")
+	var secretKey = os.Getenv("SECURITY_KEY")
 
 	claims := jwt.MapClaims{}
 	_, err = jwt.ParseWithClaims(tokenString, claims, func(userid *jwt.Token) (interface{}, error) {
-		return []byte("gotodo"), nil
+		return []byte(secretKey), nil
 	})
 	if err != nil {
 		log.Println(err)
