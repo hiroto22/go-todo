@@ -44,13 +44,13 @@ func (user *CreateUser) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	e := godotenv.Load()
 	if e != nil {
-		log.Fatal(e)
+		log.Println(e)
 	}
 	// dbConnectionInfo := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/go_todo?parseTime=true", os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"))
 	dbConnectionInfo := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("mysql", dbConnectionInfo)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	defer db.Close()
 
@@ -61,7 +61,7 @@ func (user *CreateUser) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	var data CreateUserBody
 	if err := json.Unmarshal(body, &data); err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	name := data.Name
@@ -70,7 +70,7 @@ func (user *CreateUser) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	hashPassWord, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	userData := CreateUser{name, email, string(hashPassWord), time.Now(), time.Now()}

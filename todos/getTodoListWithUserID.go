@@ -38,7 +38,7 @@ func GetTodoListWithUserId(w http.ResponseWriter, r *http.Request) {
 
 	e := godotenv.Load()
 	if e != nil {
-		log.Fatal(e)
+		log.Println(e)
 	}
 	// dbConnectionInfo := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/go_todo?parseTime=true", os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"))
 	dbConnectionInfo := os.Getenv("DATABASE_URL")
@@ -71,7 +71,7 @@ func GetTodoListWithUserId(w http.ResponseWriter, r *http.Request) {
 	log.Println(token)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	} else {
 		rows, err := db.Query("SELECT * FROM todos WHERE IsDone=? AND UserID=?", isDone, userID)
 		if err != nil {
