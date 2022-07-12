@@ -3,7 +3,6 @@ package users
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -79,7 +78,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	err = auth.PasswordVerify(user.PassWord, data.PassWord)
 	if err != nil {
-		fmt.Errorf("fail: %w", err)
+		return
 	} else {
 		token, err := auth.CreateToken(user.ID)
 		if err != nil {
