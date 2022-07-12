@@ -78,7 +78,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	err = auth.PasswordVerify(user.PassWord, data.PassWord)
 	if err != nil {
-		log.Fatalln(err)
+		http.Error(w, err.Error(), 500)
 	} else {
 		token, err := auth.CreateToken(user.ID)
 		if err != nil {
