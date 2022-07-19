@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 	"os"
-	"todo-22-app/controlar"
+	"todo-22-app/db"
 	"todo-22-app/todos"
 	"todo-22-app/users"
 
@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	controlar.CreateDb()
+	db.CreateDb()
 
 	r := mux.NewRouter()
 	user := users.NewCreateUser()

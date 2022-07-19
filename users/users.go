@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"time"
@@ -44,57 +43,68 @@ func (user *CreateUser) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	e := godotenv.Load()
 	if e != nil {
-		log.Println(e)
+		http.Error(w, e.Error(), 500)
 	}
-	// dbConnectionInfo := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/go_todo?parseTime=true", os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"))
 	dbConnectionInfo := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("mysql", dbConnectionInfo)
 	if err != nil {
-		log.Println(err)
+		http.Error(w, err.Error(), 500)
 	}
 	defer db.Close()
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Fatal(err)
+		http.Error(w, err.Error(), 500)
 	}
 
 	var data CreateUserBody
 	if err := json.Unmarshal(body, &data); err != nil {
-		log.Println(err)
+		http.Error(w, err.Error(), 500)
 	}
 
 	name := data.Name
 	email := data.Email
 	password := data.PassWord
 
+	if name == "" {
+		http.Error(w, err.Error(), 500)
+	}
+
+	if email == "" {
+		http.Error(w, err.Error(), 500)
+	}
+
+	if password == "" {
+		http.Error(w, err.Error(), 500)
+	}
+
 	hashPassWord, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		log.Println(err)
+		http.Error(w, err.Error(), 500)
 	}
 
 	userData := CreateUser{name, email, string(hashPassWord), time.Now(), time.Now()}
 
 	stmt, err := db.Prepare("INSERT INTO users (Name,Email,PassWord,CreatedAt,UpdatedAt) VALUES(?,?,?,?,?)")
 	if err != nil {
-		log.Println(err)
+		http.Error(w, err.Error(), 500)
 	}
 
-	_, err2 := stmt.Exec(userData.Name, userData.Email, userData.PassWord, time.Now(), time.Now())
+	_, err = stmt.Exec(userData.Name, userData.Email, userData.PassWord, time.Now(), time.Now())
 	if err != nil {
-		log.Println(err2)
+		http.Error(w, err.Error(), 500)
 	}
 
 	var userd User
 
 	err = db.QueryRow("SELECT * FROM users WHERE Email=?", email).Scan(&userd.ID, &userd.Name, &userd.Email, &userd.PassWord, &userd.CreatedAt, &userd.UpdatedAt)
 	if err != nil {
-		log.Println(err)
+		http.Error(w, err.Error(), 500)
 	}
 
 	token, err := auth.CreateToken(userd.ID)
 	if err != nil {
-		log.Println(err)
+		http.Error(w, err.Error(), 500)
 	}
 
 	tokenData := tokenRes{token}

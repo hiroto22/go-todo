@@ -36,13 +36,13 @@ func GetTodoList(w http.ResponseWriter, r *http.Request) {
 
 	e := godotenv.Load()
 	if e != nil {
-		log.Println(e)
+		http.Error(w, e.Error(), 500)
 	}
-	// dbConnectionInfo := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/go_todo?parseTime=true", os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"))
+
 	dbConnectionInfo := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("mysql", dbConnectionInfo)
 	if err != nil {
-		log.Println(err)
+		http.Error(w, err.Error(), 500)
 	}
 	defer db.Close()
 
@@ -58,7 +58,7 @@ func GetTodoList(w http.ResponseWriter, r *http.Request) {
 	} else {
 		rows, err := db.Query("SELECT * FROM todos WHERE IsDone=?", isDone)
 		if err != nil {
-			log.Println(err)
+			http.Error(w, err.Error(), 500)
 		}
 
 		defer rows.Close()
@@ -77,7 +77,7 @@ func GetTodoList(w http.ResponseWriter, r *http.Request) {
 				&todoList.IsDone)
 
 			if err != nil {
-				log.Println(err)
+				http.Error(w, err.Error(), 500)
 			} else {
 				data = append(data, TodoList{
 					ID:        todoList.ID,

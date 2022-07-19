@@ -3,7 +3,6 @@ package todos
 import (
 	"database/sql"
 	"encoding/json"
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -27,13 +26,13 @@ func GetTodo(w http.ResponseWriter, r *http.Request) {
 
 	e := godotenv.Load()
 	if e != nil {
-		log.Println(e)
+		http.Error(w, e.Error(), 500)
 	}
-	// dbConnectionInfo := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/go_todo?parseTime=true", os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"))
+
 	dbConnectionInfo := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("mysql", dbConnectionInfo)
 	if err != nil {
-		log.Println(err)
+		http.Error(w, err.Error(), 500)
 	}
 	defer db.Close()
 
@@ -44,7 +43,7 @@ func GetTodo(w http.ResponseWriter, r *http.Request) {
 
 	_, err2 := auth.TokenVerify(tokenString)
 	if err2 != nil {
-		log.Println(err)
+		http.Error(w, err.Error(), 500)
 	} else {
 
 		var todo TodoList
@@ -58,7 +57,7 @@ func GetTodo(w http.ResponseWriter, r *http.Request) {
 			&todo.IsDone,
 		)
 		if err != nil {
-			log.Println(err)
+			http.Error(w, err.Error(), 500)
 		}
 
 		json.NewEncoder(w).Encode(todo)
