@@ -41,13 +41,13 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 
 	e := godotenv.Load()
 	if e != nil {
-		log.Println(e)
+		http.Error(w, e.Error(), 500)
 	}
 	// dbConnectionInfo := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/go_todo", os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"))
 	dbConnectionInfo := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("mysql", dbConnectionInfo)
 	if err != nil {
-		log.Println(err)
+		http.Error(w, err.Error(), 500)
 	}
 	defer db.Close()
 
@@ -58,8 +58,7 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Println(err)
-
+		http.Error(w, err.Error(), 500)
 	}
 
 	log.Printf("request body=%s\n", body)
@@ -67,7 +66,7 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 	var data TodoBody
 
 	if err := json.Unmarshal(body, &data); err != nil {
-		log.Println(err)
+		http.Error(w, err.Error(), 500)
 	}
 
 	// userId := 12
@@ -78,7 +77,7 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 		return []byte(secretKey), nil
 	})
 	if err != nil {
-		log.Println(err)
+		http.Error(w, err.Error(), 500)
 	}
 	// do something with decoded claims
 
@@ -89,17 +88,17 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 
 	_, err2 := auth.TokenVerify(tokenString)
 	if err2 != nil {
-		log.Println(err)
+		http.Error(w, err.Error(), 500)
 	} else {
 
 		stmt, err := db.Prepare("INSERT INTO todos (Todo,UserID,CreatedAt,UpdatedAt) VALUES(?,?,?,?)")
 		if err != nil {
-			log.Println(err)
+			http.Error(w, err.Error(), 500)
 		}
 
 		_, err = stmt.Exec(todoData.Todo, userID, todoData.CreatedAt, todoData.UpdatedAt)
 		if err != nil {
-			log.Println(err)
+			http.Error(w, err.Error(), 500)
 		}
 
 		json.NewEncoder(w).Encode(todoData)

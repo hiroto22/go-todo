@@ -44,36 +44,34 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	e := godotenv.Load()
 	if e != nil {
-		log.Println(e)
+		http.Error(w, e.Error(), 500)
 	}
-	// dbConnectionInfo := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/go_todo?parseTime=true", os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"))
 	dbConnectionInfo := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("mysql", dbConnectionInfo)
 	if err != nil {
-		log.Println(err)
+		http.Error(w, err.Error(), 500)
 	}
 	defer db.Close()
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Println(err)
+		http.Error(w, err.Error(), 500)
 	}
 
 	log.Printf("request body=%s\n", r.Body)
 
 	var data LoginState
 	if err := json.Unmarshal(body, &data); err != nil {
-		log.Println(err)
+		http.Error(w, err.Error(), 500)
 	}
 
 	email := data.Email
-	// password := data.PassWord
 
 	var user User
 
 	err = db.QueryRow("SELECT * FROM users WHERE Email=?", email).Scan(&user.ID, &user.Name, &user.Email, &user.PassWord, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
-		log.Println(err)
+		http.Error(w, err.Error(), 500)
 	}
 
 	err = auth.PasswordVerify(user.PassWord, data.PassWord)
@@ -82,7 +80,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	} else {
 		token, err := auth.CreateToken(user.ID)
 		if err != nil {
-			log.Println(err)
+			http.Error(w, err.Error(), 500)
 		}
 
 		tokenData := tokenRes{token}
