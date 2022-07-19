@@ -14,7 +14,7 @@ func CreateDb() {
 	if e != nil {
 		log.Println(e)
 	}
-	// dbConnectionInfo := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/track_test", os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"))
+
 	dbConnectionInfo := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("mysql", dbConnectionInfo)
 	if err != nil {
