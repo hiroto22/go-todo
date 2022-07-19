@@ -13,4 +13,4 @@ CREATE TABLE IF NOT EXISTS `users`(
 SELECT * FROM users;
 
 
--- DESC users
+DESC users

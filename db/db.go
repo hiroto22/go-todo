@@ -1,4 +1,4 @@
-package controlar
+package db
 
 import (
 	"database/sql"
