@@ -43,7 +43,7 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 	if e != nil {
 		http.Error(w, e.Error(), 500)
 	}
-	// dbConnectionInfo := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/go_todo", os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"))
+
 	dbConnectionInfo := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("mysql", dbConnectionInfo)
 	if err != nil {
@@ -69,7 +69,6 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 500)
 	}
 
-	// userId := 12
 	secretKey := os.Getenv("SECURITY_KEY")
 	todo := data.Todo
 	claims := jwt.MapClaims{}
@@ -79,7 +78,6 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 	}
-	// do something with decoded claims
 
 	fmt.Println(claims["userid"])
 	userID := claims["userid"]
