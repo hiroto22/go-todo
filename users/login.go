@@ -3,6 +3,7 @@ package users
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -49,7 +50,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	dbConnectionInfo := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("mysql", dbConnectionInfo)
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		fmt.Println(err)
 	}
 	defer db.Close()
 
