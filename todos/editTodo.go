@@ -18,9 +18,12 @@ type EditTodoBody struct {
 	UpdatedAt time.Time `json:"updatedat"`
 }
 
+//todoを編集できるAPI
 func EditTodo(w http.ResponseWriter, r *http.Request) {
+	//CORS
+	CORS_URL := os.Getenv("CORS_URL") //呼び出しもとの情報
 	w.Header().Set("Content-Type", "*")
-	w.Header().Set("Access-Control-Allow-Origin", "https://todo-22-front.herokuapp.com")
+	w.Header().Set("Access-Control-Allow-Origin", CORS_URL)
 	switch r.Method {
 	case "OPTIONS":
 		w.Header().Set("Access-Control-Allow-Headers", "*")
@@ -33,6 +36,7 @@ func EditTodo(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, e.Error(), 500)
 	}
 
+	//MySQL接続
 	dbConnectionInfo := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("mysql", dbConnectionInfo)
 	if err != nil {
@@ -40,6 +44,7 @@ func EditTodo(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
+	//todoのidを取得
 	id := r.URL.Query().Get("id")
 
 	body, err := ioutil.ReadAll(r.Body)
@@ -47,6 +52,7 @@ func EditTodo(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 500)
 	}
 
+	//todoの内容と変更日時を記録
 	var data EditTodoBody
 	if err := json.Unmarshal(body, &data); err != nil {
 		http.Error(w, err.Error(), 500)
@@ -54,9 +60,11 @@ func EditTodo(w http.ResponseWriter, r *http.Request) {
 
 	editData := EditTodoBody{data.Todo, time.Now()}
 
+	//tokenをrequestのheaderから取得
 	tokenString := r.Header.Get("Authorization")
 	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
 
+	//token認証を行い正しければtodoを更新
 	_, err2 := auth.TokenVerify(tokenString)
 	if err2 != nil {
 		http.Error(w, err.Error(), 500)

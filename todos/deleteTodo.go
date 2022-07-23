@@ -9,10 +9,12 @@ import (
 	"github.com/joho/godotenv"
 )
 
+//todoを削除するAPI
 func DeleteTodo(w http.ResponseWriter, r *http.Request) {
-
+	//CORS
+	CORS_URL := os.Getenv("CORS_URL") //呼び出しもとの情報
 	w.Header().Set("Content-Type", "applicaiton/json")
-	w.Header().Set("Access-Control-Allow-Origin", "https://todo-22-front.herokuapp.com")
+	w.Header().Set("Access-Control-Allow-Origin", CORS_URL)
 	switch r.Method {
 	case "OPTIONS":
 		w.Header().Set("Access-Control-Allow-Headers", "*")
@@ -25,6 +27,8 @@ func DeleteTodo(w http.ResponseWriter, r *http.Request) {
 	if e != nil {
 		http.Error(w, e.Error(), 500)
 	}
+
+	//MySQL接続
 	dbConnectionInfo := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("mysql", dbConnectionInfo)
 	if err != nil {
@@ -32,8 +36,10 @@ func DeleteTodo(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
+	//queryからtodoのidを取得
 	id := r.URL.Query().Get("id")
 
+	//dbから特定のtodoを削除
 	stmt, err := db.Prepare("DELETE FROM todos WHERE ID=?")
 	if err != nil {
 		http.Error(w, err.Error(), 500)

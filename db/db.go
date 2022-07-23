@@ -9,6 +9,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
+//DBをcreateする
 func CreateDb() {
 	e := godotenv.Load()
 	if e != nil {
@@ -22,6 +23,7 @@ func CreateDb() {
 	}
 	defer db.Close()
 
+	//users table
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS `users`(" +
 		"ID int NOT NULL AUTO_INCREMENT," +
 		"Name varchar(255) NOT NULL," +
@@ -35,6 +37,7 @@ func CreateDb() {
 		log.Println(err)
 	}
 
+	//todos table
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS `todos`(" +
 		"ID int NOT NULL AUTO_INCREMENT ," +
 		"UserID int NOT NULL," +

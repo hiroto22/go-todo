@@ -12,9 +12,12 @@ import (
 	"github.com/joho/godotenv"
 )
 
+//todoを完了または未完了にするAPI
 func DoneTodo(w http.ResponseWriter, r *http.Request) {
+	//CORS
+	CORS_URL := os.Getenv("CORS_URL") //呼び出しもとの情報
 	w.Header().Set("Content-Type", "*")
-	w.Header().Set("Access-Control-Allow-Origin", "https://todo-22-front.herokuapp.com")
+	w.Header().Set("Access-Control-Allow-Origin", CORS_URL)
 	switch r.Method {
 	case "OPTIONS":
 		w.Header().Set("Access-Control-Allow-Headers", "*")
@@ -23,6 +26,7 @@ func DoneTodo(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
 
+	//MySQL接続
 	e := godotenv.Load()
 	if e != nil {
 		http.Error(w, e.Error(), 500)
@@ -34,14 +38,15 @@ func DoneTodo(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
+	//todoのidと状態(isComplete)を取得
 	id := r.URL.Query().Get("id")
 	isComplete := r.URL.Query().Get("isComplete")
 
+	//requestのheaderからtokenを取得
 	tokenString := r.Header.Get("Authorization")
 	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
 
-	log.Printf("request token=%s\n", id)
-
+	//token認証を行い正しければDBのisCompleteを更新
 	_, err2 := auth.TokenVerify(tokenString)
 	if err2 != nil {
 		log.Println("tokenはありません。")
@@ -52,6 +57,7 @@ func DoneTodo(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), 500)
 		}
 
+		//現在のisCompleteにあわせて更新する
 		if isComplete == "false" {
 			_, err = stmt.Exec(true, id)
 			if err != nil {

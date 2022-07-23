@@ -3,9 +3,7 @@ package todos
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -17,8 +15,7 @@ import (
 )
 
 type Todo struct {
-	Todo string `json:"todo"`
-	// UserID    int       `json:"userid"`
+	Todo      string    `json:"todo"`
 	CreatedAt time.Time `json:"createdat"`
 	UpdatedAt time.Time `json:"updatedat"`
 }
@@ -28,9 +25,12 @@ type TodoBody struct {
 	UserID int    `json:"userid,string"`
 }
 
+//新しいTODOを登録するAPI
 func CreateTodo(w http.ResponseWriter, r *http.Request) {
+	// CORS
+	CORS_URL := os.Getenv("CORS_URL") //呼び出しもとの情報
 	w.Header().Set("Content-Type", "*")
-	w.Header().Set("Access-Control-Allow-Origin", "https://todo-22-front.herokuapp.com")
+	w.Header().Set("Access-Control-Allow-Origin", CORS_URL)
 	switch r.Method {
 	case "OPTIONS":
 		w.Header().Set("Access-Control-Allow-Headers", "*")
@@ -44,6 +44,7 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, e.Error(), 500)
 	}
 
+	//MySQL接続
 	dbConnectionInfo := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("mysql", dbConnectionInfo)
 	if err != nil {
@@ -51,26 +52,12 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
+	//Tokenをリクエストのheaderから取得
 	tokenString := r.Header.Get("Authorization")
 	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
 
-	log.Printf("request token=%s\n", tokenString)
-
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-	}
-
-	log.Printf("request body=%s\n", body)
-
-	var data TodoBody
-
-	if err := json.Unmarshal(body, &data); err != nil {
-		http.Error(w, err.Error(), 500)
-	}
-
+	//取得したtokenからuseIdを特定
 	secretKey := os.Getenv("SECURITY_KEY")
-	todo := data.Todo
 	claims := jwt.MapClaims{}
 	_, err = jwt.ParseWithClaims(tokenString, claims, func(userid *jwt.Token) (interface{}, error) {
 		return []byte(secretKey), nil
@@ -78,12 +65,26 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 	}
-
-	fmt.Println(claims["userid"])
 	userID := claims["userid"]
 
+	//リクエストボディを取得
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+	}
+
+	//userが入力したtodoとuserId
+	var data TodoBody
+
+	if err := json.Unmarshal(body, &data); err != nil {
+		http.Error(w, err.Error(), 500)
+	}
+	todo := data.Todo
+
+	//DBに送るデータ(user_id以外)
 	todoData := Todo{todo, time.Now(), time.Now()}
 
+	//token認証を行い正しければDBにTODOを追加
 	_, err2 := auth.TokenVerify(tokenString)
 	if err2 != nil {
 		http.Error(w, err.Error(), 500)

@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"time"
@@ -30,9 +29,12 @@ type tokenRes struct {
 	Token string `json:"token"`
 }
 
+//loginの際に使うAPI
 func Login(w http.ResponseWriter, r *http.Request) {
+	//CORS
+	CORS_URL := os.Getenv("CORS_URL") //呼び出しもとの情報
 	w.Header().Set("Content-Type", "applicaiton/json")
-	w.Header().Set("Access-Control-Allow-Origin", "https://todo-22-front.herokuapp.com")
+	w.Header().Set("Access-Control-Allow-Origin", CORS_URL)
 	switch r.Method {
 	case "OPTIONS":
 		w.Header().Set("Access-Control-Allow-Headers", "*")
@@ -42,6 +44,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("Access-Control-Allow-Headers", "*")
 
+	//MySQLに接続
 	e := godotenv.Load()
 	if e != nil {
 		http.Error(w, e.Error(), 500)
@@ -58,8 +61,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 500)
 	}
 
-	log.Printf("request body=%s\n", r.Body)
-
+	//requestされたemailとpassword
 	var data LoginState
 	if err := json.Unmarshal(body, &data); err != nil {
 		http.Error(w, err.Error(), 500)
@@ -67,13 +69,16 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	email := data.Email
 
+	//DBからのuser情報
 	var user User
 
+	//emailをもとにDBからuser情報を取得
 	err = db.QueryRow("SELECT * FROM users WHERE Email=?", email).Scan(&user.ID, &user.Name, &user.Email, &user.PassWord, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 	}
 
+	//requestされたemail,passwordとDBの物が正しいか確認正しければtokenを返す
 	err = auth.PasswordVerify(user.PassWord, data.PassWord)
 	if err != nil {
 		http.Error(w, err.Error(), 500)

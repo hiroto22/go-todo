@@ -1,10 +1,7 @@
 package auth
 
 import (
-	"encoding/json"
-	"io/ioutil"
-	"log"
-	"net/http"
+	"os"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -15,38 +12,7 @@ type CreateTokenState struct {
 	Id int `json:"id"`
 }
 
-func Test(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		log.Println(err)
-
-	}
-
-	log.Printf("request body=%s\n", r.Body)
-
-	var data CreateTokenState
-
-	if err := json.Unmarshal(body, &data); err != nil {
-		log.Println(err)
-	}
-
-	id := data.Id
-
-	token, err := CreateToken(id)
-	if err != nil {
-		log.Println(err)
-	}
-
-	w.Header().Set("Content-Type", "applicaiton/json")
-	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
-	w.Header().Set("Access-Control-Allow-Credentials", "true")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-	w.Header().Set("Access-Control-Allow-Methods", "POST")
-
-	json.NewEncoder(w).Encode(token)
-
-}
-
+//tokenをつくる
 func CreateToken(userid int) (string, error) {
 
 	token := jwt.New(jwt.GetSigningMethod("HS256"))
@@ -56,7 +22,7 @@ func CreateToken(userid int) (string, error) {
 		"exp":    time.Now().Add(time.Hour * 1).Unix(),
 	}
 
-	var secretKey = "gotodo"
+	var secretKey = os.Getenv("SECURITY_KEY")
 	tokenString, err := token.SignedString([]byte(secretKey))
 	if err != nil {
 		return "", err
@@ -64,10 +30,12 @@ func CreateToken(userid int) (string, error) {
 	return tokenString, nil
 }
 
+//password認証
 func PasswordVerify(hash, pw string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(pw))
 }
 
+//token認証
 func TokenVerify(tokenString string) (*jwt.Token, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return []byte("gotodo"), nil

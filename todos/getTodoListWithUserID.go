@@ -3,8 +3,6 @@ package todos
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -24,9 +22,12 @@ type TodoListWithUserID struct {
 	IsDone    bool          `json:"isdone"`
 }
 
+//userのidにあわせたtodoの一覧を取得するAPI(isDoneの値ごとに取得)
 func GetTodoListWithUserId(w http.ResponseWriter, r *http.Request) {
+	//CORS
+	CORS_URL := os.Getenv("CORS_URL") //呼び出しもとの情報
 	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "https://todo-22-front.herokuapp.com")
+	w.Header().Set("Access-Control-Allow-Origin", CORS_URL)
 	switch r.Method {
 	case "OPTIONS":
 		w.Header().Set("Access-Control-Allow-Headers", "*")
@@ -36,11 +37,11 @@ func GetTodoListWithUserId(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("Access-Control-Allow-Headers", "*")
 
+	//MySQLに接続
 	e := godotenv.Load()
 	if e != nil {
 		http.Error(w, e.Error(), 500)
 	}
-
 	dbConnectionInfo := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("mysql", dbConnectionInfo)
 	if err != nil {
@@ -48,13 +49,15 @@ func GetTodoListWithUserId(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
+	//指定されたisDoneの状態を取得
 	isDone := r.URL.Query().Get("isdone")
 
+	//tokenをrequestのheaderから取得
 	tokenString := r.Header.Get("Authorization")
 	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
 
+	//tokenからuserIdを取得
 	var secretKey = os.Getenv("SECURITY_KEY")
-
 	claims := jwt.MapClaims{}
 	_, err = jwt.ParseWithClaims(tokenString, claims, func(userid *jwt.Token) (interface{}, error) {
 		return []byte(secretKey), nil
@@ -62,13 +65,10 @@ func GetTodoListWithUserId(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 	}
-
-	fmt.Println(claims["userid"])
 	userID := claims["userid"]
 
-	token, err := auth.TokenVerify(tokenString)
-	log.Println(token)
-
+	//token認証して正しければtodoの一覧を取得し値を返す
+	_, err = auth.TokenVerify(tokenString)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 	} else {
@@ -79,6 +79,7 @@ func GetTodoListWithUserId(w http.ResponseWriter, r *http.Request) {
 
 		defer rows.Close()
 
+		//returnされる内容
 		var data []TodoListWithUserID
 
 		for rows.Next() {

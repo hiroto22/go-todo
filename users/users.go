@@ -28,10 +28,12 @@ type CreateUserBody struct {
 	PassWord string `json:"password"`
 }
 
+//user登録する際につかうAPI
 func (user *CreateUser) CreateUser(w http.ResponseWriter, r *http.Request) {
-
+	//CORS
+	CORS_URL := os.Getenv("CORS_URL") //呼び出しもとの情報
 	w.Header().Set("Content-Type", "applicaiton/json")
-	w.Header().Set("Access-Control-Allow-Origin", "https://todo-22-front.herokuapp.com")
+	w.Header().Set("Access-Control-Allow-Origin", CORS_URL)
 	switch r.Method {
 	case "OPTIONS":
 		w.Header().Set("Access-Control-Allow-Headers", "*")
@@ -41,6 +43,7 @@ func (user *CreateUser) CreateUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("Access-Control-Allow-Headers", "*")
 
+	//DB接続
 	e := godotenv.Load()
 	if e != nil {
 		http.Error(w, e.Error(), 500)
@@ -52,16 +55,17 @@ func (user *CreateUser) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
+	//requestされた内容を取得
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 	}
 
+	//requetされたuser情報
 	var data CreateUserBody
 	if err := json.Unmarshal(body, &data); err != nil {
 		http.Error(w, err.Error(), 500)
 	}
-
 	name := data.Name
 	email := data.Email
 	password := data.PassWord
@@ -78,30 +82,33 @@ func (user *CreateUser) CreateUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 500)
 	}
 
+	//passwordをhash化する
 	hashPassWord, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 	}
 
+	//DBに送るuser情報
 	userData := CreateUser{name, email, string(hashPassWord), time.Now(), time.Now()}
 
+	//DBにuser情報を登録
 	stmt, err := db.Prepare("INSERT INTO users (Name,Email,PassWord,CreatedAt,UpdatedAt) VALUES(?,?,?,?,?)")
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 	}
-
 	_, err = stmt.Exec(userData.Name, userData.Email, userData.PassWord, time.Now(), time.Now())
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 	}
 
+	//登録されたuser情報を取得
 	var userd User
-
 	err = db.QueryRow("SELECT * FROM users WHERE Email=?", email).Scan(&userd.ID, &userd.Name, &userd.Email, &userd.PassWord, &userd.CreatedAt, &userd.UpdatedAt)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 	}
 
+	//登録されたuser情報をもとにtoken作成
 	token, err := auth.CreateToken(userd.ID)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
