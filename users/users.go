@@ -31,9 +31,8 @@ type CreateUserBody struct {
 //user登録する際につかうAPI
 func (user *CreateUser) CreateUser(w http.ResponseWriter, r *http.Request) {
 	//CORS
-	CORS_URL := os.Getenv("CORS_URL") //呼び出しもとの情報
 	w.Header().Set("Content-Type", "applicaiton/json")
-	w.Header().Set("Access-Control-Allow-Origin", CORS_URL)
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	switch r.Method {
 	case "OPTIONS":
 		w.Header().Set("Access-Control-Allow-Headers", "*")
