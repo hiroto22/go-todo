@@ -44,26 +44,26 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Headers", "*")
 
 	//MySQLに接続
-	e := godotenv.Load()
+	e := godotenv.Load() //環境変数の読み込み
 	if e != nil {
-		http.Error(w, e.Error(), 500)
+		http.Error(w, "Internal Server Error", 500)
 	}
 	dbConnectionInfo := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("mysql", dbConnectionInfo)
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, "Internal Server Error", 500)
 	}
 	defer db.Close()
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, "Internal Server Error", 500)
 	}
 
 	//requestされたemailとpassword
 	var data LoginState
 	if err := json.Unmarshal(body, &data); err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, "400 Bad Request", 400)
 	}
 
 	email := data.Email
@@ -74,17 +74,17 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	//emailをもとにDBからuser情報を取得
 	err = db.QueryRow("SELECT * FROM users WHERE Email=?", email).Scan(&user.ID, &user.Name, &user.Email, &user.PassWord, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, "Internal Server Error", 500)
 	}
 
 	//requestされたemail,passwordとDBの物が正しいか確認正しければtokenを返す
 	err = auth.PasswordVerify(user.PassWord, data.PassWord)
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
 	} else {
 		token, err := auth.CreateToken(user.ID)
 		if err != nil {
-			http.Error(w, err.Error(), 500)
+			http.Error(w, "Internal Server Error", 500)
 		}
 
 		tokenData := tokenRes{token}

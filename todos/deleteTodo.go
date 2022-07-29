@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
+	"strings"
+	"todo-22-app/auth"
 
 	"github.com/joho/godotenv"
 )
@@ -22,16 +24,28 @@ func DeleteTodo(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
 
-	e := godotenv.Load()
+	//requestのheaderからtokenを取得
+	tokenString := r.Header.Get("Authorization")
+	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
+
+	//Token認証
+	_, err := auth.TokenVerify(tokenString)
+	if err != nil {
+		http.Error(w, "Unauthorized error", http.StatusUnauthorized)
+		return
+	}
+
+	//MySQL接続
+	e := godotenv.Load() //環境変数の読み込み
 	if e != nil {
-		http.Error(w, e.Error(), 500)
+		http.Error(w, "Internal Server Error", 500)
 	}
 
 	//MySQL接続
 	dbConnectionInfo := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("mysql", dbConnectionInfo)
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, "Internal Server Error", 500)
 	}
 	defer db.Close()
 
@@ -41,14 +55,13 @@ func DeleteTodo(w http.ResponseWriter, r *http.Request) {
 	//dbから特定のtodoを削除
 	stmt, err := db.Prepare("DELETE FROM todos WHERE ID=?")
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, "Internal Server Error", 500)
 	}
 
 	_, err = stmt.Exec(id)
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, "Internal Server Error", 500)
 	}
 
 	json.NewEncoder(w).Encode(id)
-
 }

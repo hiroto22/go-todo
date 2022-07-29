@@ -28,9 +28,8 @@ type TodoBody struct {
 //新しいTODOを登録するAPI
 func CreateTodo(w http.ResponseWriter, r *http.Request) {
 	// CORS
-	CORS_URL := os.Getenv("CORS_URL") //呼び出しもとの情報
 	w.Header().Set("Content-Type", "*")
-	w.Header().Set("Access-Control-Allow-Origin", CORS_URL)
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	switch r.Method {
 	case "OPTIONS":
 		w.Header().Set("Access-Control-Allow-Headers", "*")
@@ -39,22 +38,28 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
 
-	e := godotenv.Load()
-	if e != nil {
-		http.Error(w, e.Error(), 500)
-	}
-
-	//MySQL接続
-	dbConnectionInfo := os.Getenv("DATABASE_URL")
-	db, err := sql.Open("mysql", dbConnectionInfo)
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-	}
-	defer db.Close()
-
 	//Tokenをリクエストのheaderから取得
 	tokenString := r.Header.Get("Authorization")
 	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
+
+	//Token認証
+	_, err := auth.TokenVerify(tokenString)
+	if err != nil {
+		http.Error(w, "Unauthorized error", http.StatusUnauthorized)
+		return
+	}
+
+	//MySQL接続
+	e := godotenv.Load() //環境変数の読み込み
+	if e != nil {
+		http.Error(w, "Internal Server Error", 500)
+	}
+	dbConnectionInfo := os.Getenv("DATABASE_URL")
+	db, err := sql.Open("mysql", dbConnectionInfo)
+	if err != nil {
+		http.Error(w, "Internal Server Error", 500)
+	}
+	defer db.Close()
 
 	//取得したtokenからuseIdを特定
 	secretKey := os.Getenv("SECURITY_KEY")
@@ -63,43 +68,38 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 		return []byte(secretKey), nil
 	})
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, "Internal Server Error", 500)
 	}
 	userID := claims["userid"]
 
 	//リクエストボディを取得
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, "Internal Server Error", 500)
 	}
 
 	//userが入力したtodoとuserId
 	var data TodoBody
 
 	if err := json.Unmarshal(body, &data); err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, "Internal Server Error", 500)
 	}
 	todo := data.Todo
 
 	//DBに送るデータ(user_id以外)
-	todoData := Todo{todo, time.Now(), time.Now()}
+	timeNow := time.Now() //現在時刻の取得
+	todoData := Todo{todo, timeNow, timeNow}
 
-	//token認証を行い正しければDBにTODOを追加
-	_, err2 := auth.TokenVerify(tokenString)
-	if err2 != nil {
-		http.Error(w, err.Error(), 500)
-	} else {
-
-		stmt, err := db.Prepare("INSERT INTO todos (Todo,UserID,CreatedAt,UpdatedAt) VALUES(?,?,?,?)")
-		if err != nil {
-			http.Error(w, err.Error(), 500)
-		}
-
-		_, err = stmt.Exec(todoData.Todo, userID, todoData.CreatedAt, todoData.UpdatedAt)
-		if err != nil {
-			http.Error(w, err.Error(), 500)
-		}
-
-		json.NewEncoder(w).Encode(todoData)
+	//DBにTODOを追加
+	stmt, err := db.Prepare("INSERT INTO todos (Todo,UserID,CreatedAt,UpdatedAt) VALUES(?,?,?,?)")
+	if err != nil {
+		http.Error(w, "Internal Server Error", 500)
 	}
+
+	_, err = stmt.Exec(todoData.Todo, userID, todoData.CreatedAt, todoData.UpdatedAt)
+	if err != nil {
+		http.Error(w, "Internal Server Error", 500)
+	}
+
+	json.NewEncoder(w).Encode(todoData)
 }
