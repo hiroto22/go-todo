@@ -25,46 +25,46 @@ func GetTodo(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("Access-Control-Allow-Headers", "*")
 
+	//tokenをrequestのheaderから取得
+	tokenString := r.Header.Get("Authorization")
+	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
+
+	//token認証
+	_, err := auth.TokenVerify(tokenString)
+	if err != nil {
+		http.Error(w, "Unauthorized error", http.StatusUnauthorized)
+		return
+	}
+
 	//MySQLに接続
-	e := godotenv.Load()
+	e := godotenv.Load() //環境変数の読み込み
 	if e != nil {
-		http.Error(w, e.Error(), 500)
+		http.Error(w, "Internal Server Error", 500)
 	}
 	dbConnectionInfo := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("mysql", dbConnectionInfo)
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, "Internal Server Error", 500)
 	}
 	defer db.Close()
 
 	//todoのidを取得
 	id := r.URL.Query().Get("id")
 
-	//tokenをrequestのheaderから取得
-	tokenString := r.Header.Get("Authorization")
-	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
+	var todo TodoList
 
-	//token認証して正しければDBから特定のtodoを取得
-	_, err2 := auth.TokenVerify(tokenString)
-	if err2 != nil {
-		http.Error(w, err.Error(), 500)
-	} else {
-
-		var todo TodoList
-
-		err = db.QueryRow("SELECT * FROM todos WHERE ID=?", id).Scan(
-			&todo.ID,
-			&todo.UserID,
-			&todo.Todo,
-			&todo.CreatedAt,
-			&todo.UpdatedAt,
-			&todo.IsDone,
-		)
-		if err != nil {
-			http.Error(w, err.Error(), 500)
-		}
-
-		json.NewEncoder(w).Encode(todo)
+	//todoの取得
+	err = db.QueryRow("SELECT * FROM todos WHERE ID=?", id).Scan(
+		&todo.ID,
+		&todo.UserID,
+		&todo.Todo,
+		&todo.CreatedAt,
+		&todo.UpdatedAt,
+		&todo.IsDone,
+	)
+	if err != nil {
+		http.Error(w, "Internal Server Error", 500)
 	}
 
+	json.NewEncoder(w).Encode(todo)
 }

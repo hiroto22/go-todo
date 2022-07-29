@@ -43,48 +43,51 @@ func (user *CreateUser) CreateUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Headers", "*")
 
 	//DB接続
-	e := godotenv.Load()
+	e := godotenv.Load() //環境変数の読み込み
 	if e != nil {
-		http.Error(w, e.Error(), 500)
+		http.Error(w, "Internal Server Error", 500)
 	}
 	dbConnectionInfo := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("mysql", dbConnectionInfo)
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, "Internal Server Error", 500)
 	}
 	defer db.Close()
 
 	//requestされた内容を取得
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, "Internal Server Error", 500)
 	}
 
 	//requetされたuser情報
 	var data CreateUserBody
 	if err := json.Unmarshal(body, &data); err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, "400 Bad Request", 400)
 	}
 	name := data.Name
 	email := data.Email
 	password := data.PassWord
 
 	if name == "" {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, "400 Bad Request", 400)
+		return
 	}
 
 	if email == "" {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, "400 Bad Request", 400)
+		return
 	}
 
 	if password == "" {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, "400 Bad Request", 400)
+		return
 	}
 
 	//passwordをhash化する
 	hashPassWord, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, "Internal Server Error", 500)
 	}
 
 	//DBに送るuser情報
@@ -93,24 +96,24 @@ func (user *CreateUser) CreateUser(w http.ResponseWriter, r *http.Request) {
 	//DBにuser情報を登録
 	stmt, err := db.Prepare("INSERT INTO users (Name,Email,PassWord,CreatedAt,UpdatedAt) VALUES(?,?,?,?,?)")
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, "Internal Server Error", 500)
 	}
 	_, err = stmt.Exec(userData.Name, userData.Email, userData.PassWord, time.Now(), time.Now())
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, "Internal Server Error", 500)
 	}
 
 	//登録されたuser情報を取得
 	var userd User
 	err = db.QueryRow("SELECT * FROM users WHERE Email=?", email).Scan(&userd.ID, &userd.Name, &userd.Email, &userd.PassWord, &userd.CreatedAt, &userd.UpdatedAt)
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, "Internal Server Error", 500)
 	}
 
 	//登録されたuser情報をもとにtoken作成
 	token, err := auth.CreateToken(userd.ID)
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, "Internal Server Error", 500)
 	}
 
 	tokenData := tokenRes{token}

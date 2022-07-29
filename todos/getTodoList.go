@@ -37,21 +37,6 @@ func GetTodoList(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("Access-Control-Allow-Headers", "*")
 
-	//MySQL接続
-	e := godotenv.Load()
-	if e != nil {
-		http.Error(w, e.Error(), 500)
-	}
-	dbConnectionInfo := os.Getenv("DATABASE_URL")
-	db, err := sql.Open("mysql", dbConnectionInfo)
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-	}
-	defer db.Close()
-
-	//指定されたisCompleteの状態
-	isDone := r.URL.Query().Get("isComplete")
-
 	//tokenをrequestのheaderから取得
 	tokenString := r.Header.Get("Authorization")
 	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
@@ -60,45 +45,59 @@ func GetTodoList(w http.ResponseWriter, r *http.Request) {
 	token, err := auth.TokenVerify(tokenString)
 	log.Printf("request token=%s\n", token)
 	if err != nil {
-		log.Println("")
-	} else {
-		rows, err := db.Query("SELECT * FROM todos WHERE IsDone=?", isDone)
-		if err != nil {
-			http.Error(w, err.Error(), 500)
-		}
-
-		defer rows.Close()
-
-		var data []TodoList
-
-		for rows.Next() {
-			var todoList TodoList
-
-			err := rows.Scan(
-				&todoList.ID,
-				&todoList.UserID,
-				&todoList.Todo,
-				&todoList.CreatedAt,
-				&todoList.UpdatedAt,
-				&todoList.IsDone)
-
-			if err != nil {
-				http.Error(w, err.Error(), 500)
-			} else {
-				data = append(data, TodoList{
-					ID:        todoList.ID,
-					UserID:    todoList.UserID,
-					Todo:      todoList.Todo,
-					CreatedAt: todoList.CreatedAt,
-					UpdatedAt: todoList.UpdatedAt,
-					IsDone:    todoList.IsDone,
-				})
-			}
-		}
-
-		// jsonData, _ := json.Marshal(data)
-
-		json.NewEncoder(w).Encode(data)
+		http.Error(w, "Unauthorized error", http.StatusUnauthorized)
+		return
 	}
 
+	//MySQL接続
+	e := godotenv.Load() //環境変数の読み込み
+	if e != nil {
+		http.Error(w, "Internal Server Error", 500)
+	}
+	dbConnectionInfo := os.Getenv("DATABASE_URL")
+	db, err := sql.Open("mysql", dbConnectionInfo)
+	if err != nil {
+		http.Error(w, "Internal Server Error", 500)
+	}
+	defer db.Close()
+
+	//指定されたisCompleteの状態
+	isDone := r.URL.Query().Get("isComplete")
+
+	rows, err := db.Query("SELECT * FROM todos WHERE IsDone=?", isDone)
+	if err != nil {
+		http.Error(w, "Internal Server Error", 500)
+	}
+
+	defer rows.Close()
+
+	var data []TodoList
+
+	//todolistの取得
+	for rows.Next() {
+		var todoList TodoList
+
+		err := rows.Scan(
+			&todoList.ID,
+			&todoList.UserID,
+			&todoList.Todo,
+			&todoList.CreatedAt,
+			&todoList.UpdatedAt,
+			&todoList.IsDone)
+
+		if err != nil {
+			http.Error(w, "400 Bad Request", 400)
+		} else {
+			data = append(data, TodoList{
+				ID:        todoList.ID,
+				UserID:    todoList.UserID,
+				Todo:      todoList.Todo,
+				CreatedAt: todoList.CreatedAt,
+				UpdatedAt: todoList.UpdatedAt,
+				IsDone:    todoList.IsDone,
+			})
+		}
+	}
+
+	json.NewEncoder(w).Encode(data)
 }

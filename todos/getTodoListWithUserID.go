@@ -36,24 +36,31 @@ func GetTodoListWithUserId(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("Access-Control-Allow-Headers", "*")
 
+	//tokenをrequestのheaderから取得
+	tokenString := r.Header.Get("Authorization")
+	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
+
+	//token認証
+	_, err := auth.TokenVerify(tokenString)
+	if err != nil {
+		http.Error(w, "Unauthorized error", http.StatusUnauthorized)
+		return
+	}
+
 	//MySQLに接続
-	e := godotenv.Load()
+	e := godotenv.Load() //環境変数の読み込み
 	if e != nil {
-		http.Error(w, e.Error(), 500)
+		http.Error(w, "Internal Server Error", 500)
 	}
 	dbConnectionInfo := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("mysql", dbConnectionInfo)
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, "Internal Server Error", 500)
 	}
 	defer db.Close()
 
 	//指定されたisDoneの状態を取得
 	isDone := r.URL.Query().Get("isdone")
-
-	//tokenをrequestのheaderから取得
-	tokenString := r.Header.Get("Authorization")
-	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
 
 	//tokenからuserIdを取得
 	var secretKey = os.Getenv("SECURITY_KEY")
@@ -62,51 +69,45 @@ func GetTodoListWithUserId(w http.ResponseWriter, r *http.Request) {
 		return []byte(secretKey), nil
 	})
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, "Internal Server Error", 500)
 	}
 	userID := claims["userid"]
 
-	//token認証して正しければtodoの一覧を取得し値を返す
-	_, err = auth.TokenVerify(tokenString)
+	rows, err := db.Query("SELECT * FROM todos WHERE IsDone=? AND UserID=?", isDone, userID)
 	if err != nil {
-		http.Error(w, err.Error(), 500)
-	} else {
-		rows, err := db.Query("SELECT * FROM todos WHERE IsDone=? AND UserID=?", isDone, userID)
-		if err != nil {
-			http.Error(w, err.Error(), 500)
-		}
-
-		defer rows.Close()
-
-		//returnされる内容
-		var data []TodoListWithUserID
-
-		for rows.Next() {
-			var todoList TodoList
-
-			err := rows.Scan(
-				&todoList.ID,
-				&todoList.UserID,
-				&todoList.Todo,
-				&todoList.CreatedAt,
-				&todoList.UpdatedAt,
-				&todoList.IsDone)
-
-			if err != nil {
-				http.Error(w, err.Error(), 500)
-			} else {
-				data = append(data, TodoListWithUserID{
-					ID:        todoList.ID,
-					UserID:    todoList.UserID,
-					Todo:      todoList.Todo,
-					CreatedAt: todoList.CreatedAt,
-					UpdatedAt: todoList.UpdatedAt,
-					IsDone:    todoList.IsDone,
-				})
-			}
-		}
-
-		json.NewEncoder(w).Encode(data)
+		http.Error(w, "Internal Server Error", 500)
 	}
 
+	defer rows.Close()
+
+	//returnされる内容
+	var data []TodoListWithUserID
+
+	//useridごとのtodoListoを取得
+	for rows.Next() {
+		var todoList TodoList
+
+		err := rows.Scan(
+			&todoList.ID,
+			&todoList.UserID,
+			&todoList.Todo,
+			&todoList.CreatedAt,
+			&todoList.UpdatedAt,
+			&todoList.IsDone)
+
+		if err != nil {
+			http.Error(w, "Internal Server Error", 500)
+		} else {
+			data = append(data, TodoListWithUserID{
+				ID:        todoList.ID,
+				UserID:    todoList.UserID,
+				Todo:      todoList.Todo,
+				CreatedAt: todoList.CreatedAt,
+				UpdatedAt: todoList.UpdatedAt,
+				IsDone:    todoList.IsDone,
+			})
+		}
+	}
+
+	json.NewEncoder(w).Encode(data)
 }

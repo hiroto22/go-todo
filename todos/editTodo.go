@@ -30,16 +30,25 @@ func EditTodo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
-	e := godotenv.Load()
+	e := godotenv.Load() //環境変数の読み込み
 	if e != nil {
-		http.Error(w, e.Error(), 500)
+		http.Error(w, "Internal Server Error", 500)
+	}
+	//tokenをrequestのheaderから取得
+	tokenString := r.Header.Get("Authorization")
+	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
+
+	//token認証
+	_, err := auth.TokenVerify(tokenString)
+	if err != nil {
+		http.Error(w, "Unauthorized error", http.StatusUnauthorized)
 	}
 
 	//MySQL接続
 	dbConnectionInfo := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("mysql", dbConnectionInfo)
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, "Internal Server Error", 500)
 	}
 	defer db.Close()
 
@@ -48,38 +57,27 @@ func EditTodo(w http.ResponseWriter, r *http.Request) {
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, "Internal Server Error", 500)
 	}
 
 	//todoの内容と変更日時を記録
 	var data EditTodoBody
 	if err := json.Unmarshal(body, &data); err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, "400 Bad Request", 400)
 	}
 
 	editData := EditTodoBody{data.Todo, time.Now()}
 
-	//tokenをrequestのheaderから取得
-	tokenString := r.Header.Get("Authorization")
-	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
-
-	//token認証を行い正しければtodoを更新
-	_, err2 := auth.TokenVerify(tokenString)
-	if err2 != nil {
-		http.Error(w, err.Error(), 500)
-	} else {
-
-		stmt, err := db.Prepare("UPDATE todos set Todo=?, UpdatedAt=? WHERE ID=?")
-		if err != nil {
-			http.Error(w, err.Error(), 500)
-		}
-
-		_, err = stmt.Exec(editData.Todo, editData.UpdatedAt, id)
-		if err != nil {
-			http.Error(w, err.Error(), 500)
-		}
-
-		json.NewEncoder(w).Encode(editData)
+	//todoを更新
+	stmt, err := db.Prepare("UPDATE todos set Todo=?, UpdatedAt=? WHERE ID=?")
+	if err != nil {
+		http.Error(w, "Internal Server Error", 500)
 	}
 
+	_, err = stmt.Exec(editData.Todo, editData.UpdatedAt, id)
+	if err != nil {
+		http.Error(w, "Internal Server Error", 500)
+	}
+
+	json.NewEncoder(w).Encode(editData)
 }
