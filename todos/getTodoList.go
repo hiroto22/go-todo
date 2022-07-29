@@ -58,7 +58,7 @@ func GetTodoList(w http.ResponseWriter, r *http.Request) {
 
 	//token認証
 	token, err := auth.TokenVerify(tokenString)
-	log.Printf("request token=%s\n", token)
+	log.Println(token)
 	if err != nil {
 		log.Println("")
 	} else {
@@ -95,8 +95,6 @@ func GetTodoList(w http.ResponseWriter, r *http.Request) {
 				})
 			}
 		}
-
-		// jsonData, _ := json.Marshal(data)
 
 		json.NewEncoder(w).Encode(data)
 	}
