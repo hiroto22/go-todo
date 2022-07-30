@@ -46,11 +46,13 @@ func (user *CreateUser) CreateUser(w http.ResponseWriter, r *http.Request) {
 	e := godotenv.Load() //環境変数の読み込み
 	if e != nil {
 		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 	dbConnectionInfo := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("mysql", dbConnectionInfo)
 	if err != nil {
 		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 	defer db.Close()
 
@@ -58,12 +60,14 @@ func (user *CreateUser) CreateUser(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 
 	//requetされたuser情報
 	var data CreateUserBody
 	if err := json.Unmarshal(body, &data); err != nil {
 		http.Error(w, "400 Bad Request", 400)
+		return
 	}
 	name := data.Name
 	email := data.Email
@@ -88,6 +92,7 @@ func (user *CreateUser) CreateUser(w http.ResponseWriter, r *http.Request) {
 	hashPassWord, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 
 	//DBに送るuser情報
@@ -97,10 +102,12 @@ func (user *CreateUser) CreateUser(w http.ResponseWriter, r *http.Request) {
 	stmt, err := db.Prepare("INSERT INTO users (Name,Email,PassWord,CreatedAt,UpdatedAt) VALUES(?,?,?,?,?)")
 	if err != nil {
 		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 	_, err = stmt.Exec(userData.Name, userData.Email, userData.PassWord, time.Now(), time.Now())
 	if err != nil {
 		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 
 	//登録されたuser情報を取得
@@ -108,12 +115,14 @@ func (user *CreateUser) CreateUser(w http.ResponseWriter, r *http.Request) {
 	err = db.QueryRow("SELECT * FROM users WHERE Email=?", email).Scan(&userd.ID, &userd.Name, &userd.Email, &userd.PassWord, &userd.CreatedAt, &userd.UpdatedAt)
 	if err != nil {
 		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 
 	//登録されたuser情報をもとにtoken作成
 	token, err := auth.CreateToken(userd.ID)
 	if err != nil {
 		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 
 	tokenData := tokenRes{token}

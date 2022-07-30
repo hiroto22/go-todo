@@ -53,11 +53,13 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 	e := godotenv.Load() //環境変数の読み込み
 	if e != nil {
 		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 	dbConnectionInfo := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("mysql", dbConnectionInfo)
 	if err != nil {
 		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 	defer db.Close()
 
@@ -69,13 +71,15 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 	userID := claims["userid"]
 
 	//リクエストボディを取得
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
+		http.Error(w, "400 Bad Request", 400)
+		return
 	}
 
 	//userが入力したtodoとuserId
@@ -83,6 +87,7 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.Unmarshal(body, &data); err != nil {
 		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 	todo := data.Todo
 
@@ -94,11 +99,13 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 	stmt, err := db.Prepare("INSERT INTO todos (Todo,UserID,CreatedAt,UpdatedAt) VALUES(?,?,?,?)")
 	if err != nil {
 		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 
 	_, err = stmt.Exec(todoData.Todo, userID, todoData.CreatedAt, todoData.UpdatedAt)
 	if err != nil {
 		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 
 	json.NewEncoder(w).Encode(todoData)

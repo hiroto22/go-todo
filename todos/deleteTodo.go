@@ -39,6 +39,7 @@ func DeleteTodo(w http.ResponseWriter, r *http.Request) {
 	e := godotenv.Load() //環境変数の読み込み
 	if e != nil {
 		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 
 	//MySQL接続
@@ -46,6 +47,7 @@ func DeleteTodo(w http.ResponseWriter, r *http.Request) {
 	db, err := sql.Open("mysql", dbConnectionInfo)
 	if err != nil {
 		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 	defer db.Close()
 
@@ -56,11 +58,13 @@ func DeleteTodo(w http.ResponseWriter, r *http.Request) {
 	stmt, err := db.Prepare("DELETE FROM todos WHERE ID=?")
 	if err != nil {
 		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 
 	_, err = stmt.Exec(id)
 	if err != nil {
 		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 
 	json.NewEncoder(w).Encode(id)

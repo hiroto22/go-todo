@@ -51,11 +51,13 @@ func GetTodoListWithUserId(w http.ResponseWriter, r *http.Request) {
 	e := godotenv.Load() //環境変数の読み込み
 	if e != nil {
 		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 	dbConnectionInfo := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("mysql", dbConnectionInfo)
 	if err != nil {
 		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 	defer db.Close()
 
@@ -70,12 +72,14 @@ func GetTodoListWithUserId(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 	userID := claims["userid"]
 
 	rows, err := db.Query("SELECT * FROM todos WHERE IsDone=? AND UserID=?", isDone, userID)
 	if err != nil {
 		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 
 	defer rows.Close()
@@ -97,6 +101,7 @@ func GetTodoListWithUserId(w http.ResponseWriter, r *http.Request) {
 
 		if err != nil {
 			http.Error(w, "Internal Server Error", 500)
+			return
 		} else {
 			data = append(data, TodoListWithUserID{
 				ID:        todoList.ID,

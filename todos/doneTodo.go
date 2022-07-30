@@ -39,11 +39,13 @@ func DoneTodo(w http.ResponseWriter, r *http.Request) {
 	e := godotenv.Load() //環境変数の読み込み
 	if e != nil {
 		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 	dbConnectionInfo := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("mysql", dbConnectionInfo)
 	if err != nil {
 		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 	defer db.Close()
 
@@ -54,6 +56,7 @@ func DoneTodo(w http.ResponseWriter, r *http.Request) {
 	stmt, err := db.Prepare("UPDATE todos set IsDone=? WHERE ID=?")
 	if err != nil {
 		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 
 	//現在のisCompleteにあわせて更新する
@@ -61,11 +64,13 @@ func DoneTodo(w http.ResponseWriter, r *http.Request) {
 		_, err = stmt.Exec(true, id)
 		if err != nil {
 			http.Error(w, "Internal Server Error", 500)
+			return
 		}
 	} else {
 		_, err = stmt.Exec(false, id)
 		if err != nil {
 			http.Error(w, "Internal Server Error", 500)
+			return
 		}
 	}
 
