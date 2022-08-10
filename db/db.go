@@ -9,6 +9,14 @@ import (
 	"github.com/joho/godotenv"
 )
 
+func ConnectDb() *sql.DB {
+	godotenv.Load()
+
+	dbConnectionInfo := os.Getenv("DATABASE_URL")
+	db, _ := sql.Open("mysql", dbConnectionInfo)
+	return db
+}
+
 //DBをcreateする
 func CreateDb() {
 	e := godotenv.Load()

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"todo-22-app/controller"
 	"todo-22-app/db"
 	"todo-22-app/todos"
 	"todo-22-app/users"
@@ -15,7 +16,7 @@ func Router() *mux.Router {
 	r := mux.NewRouter()
 	user := users.NewCreateUser()
 	r.HandleFunc("/createuser", user.CreateUser)
-	r.HandleFunc("/login", users.Login)
+	r.HandleFunc("/login", controller.Login)
 	r.HandleFunc("/createtodo", todos.CreateTodo)
 	r.HandleFunc("/deletetodo", todos.DeleteTodo)
 	r.HandleFunc("/edittodo", todos.EditTodo)

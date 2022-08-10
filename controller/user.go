@@ -1,22 +1,12 @@
-package users
+package controller
 
 import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
-	"time"
 	"todo-22-app/auth"
-	"todo-22-app/db"
+	"todo-22-app/model"
 )
-
-type User struct {
-	ID        int       `json:"id"`
-	Name      string    `json:"name"`
-	Email     string    `json:"email"`
-	PassWord  string    `json:"password"`
-	CreatedAt time.Time `json:"createdat"`
-	UpdatedAt time.Time `json:"updatedat"`
-}
 
 type LoginState struct {
 	Email    string `json:"email"`
@@ -40,34 +30,17 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("Access-Control-Allow-Headers", "*")
 
-	//MySQLに接続
-	db := db.ConnectDb()
-	defer db.Close()
-
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, "Internal Server Error", 500)
 		return
 	}
 
-	//requestされたemailとpassword
 	var data LoginState
-	if err := json.Unmarshal(body, &data); err != nil {
-		http.Error(w, "400 Bad Request", 400)
-		return
-	}
-
+	json.Unmarshal(body, &data)
 	email := data.Email
 
-	//DBからのuser情報
-	var user User
-
-	//emailをもとにDBからuser情報を取得
-	err = db.QueryRow("SELECT * FROM users WHERE Email=?", email).Scan(&user.ID, &user.Name, &user.Email, &user.PassWord, &user.CreatedAt, &user.UpdatedAt)
-	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
+	user := model.Login(body, email)
 
 	//requestされたemail,passwordとDBの物が正しいか確認正しければtokenを返す
 	err = auth.PasswordVerify(user.PassWord, data.PassWord)

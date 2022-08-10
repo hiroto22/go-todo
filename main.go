@@ -10,7 +10,8 @@ import (
 )
 
 func main() {
-	db.CreateDb()
+	db := db.ConnectDb()
+	defer db.Close()
 
 	server := server.Router()
 	http.ListenAndServe(":"+os.Getenv("PORT"), server)
