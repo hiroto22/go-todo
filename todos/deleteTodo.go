@@ -31,7 +31,7 @@ func DeleteTodo(w http.ResponseWriter, r *http.Request) {
 	//Token認証
 	_, err := auth.TokenVerify(tokenString)
 	if err != nil {
-		http.Error(w, "Unauthorized error", http.StatusUnauthorized)
+		http.Error(w, "invalid_access_token", http.StatusUnauthorized)
 		return
 	}
 

@@ -45,7 +45,7 @@ func GetTodoList(w http.ResponseWriter, r *http.Request) {
 	token, err := auth.TokenVerify(tokenString)
 	log.Printf("request token=%s\n", token)
 	if err != nil {
-		http.Error(w, "Unauthorized error", http.StatusUnauthorized)
+		http.Error(w, "invalid_access_token", http.StatusUnauthorized)
 		return
 	}
 
