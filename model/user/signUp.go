@@ -24,7 +24,11 @@ func (user *SignUpUser) SingUp(name string, email string, password string) error
 
 	nowTime := time.Now()
 	//DBに送るuser情報
-	userData := SignUpUser{name, email, password, nowTime, nowTime}
+	user.Name = name
+	user.Email = email
+	user.PassWord = password
+	user.CreatedAt = nowTime
+	user.UpdatedAt = nowTime
 
 	//DBにuser情報を登録
 	stmt, err := db.Prepare("INSERT INTO users (Name,Email,PassWord,CreatedAt,UpdatedAt) VALUES(?,?,?,?,?)")
@@ -32,7 +36,7 @@ func (user *SignUpUser) SingUp(name string, email string, password string) error
 		return err
 	}
 
-	_, err = stmt.Exec(userData.Name, userData.Email, userData.PassWord, userData.CreatedAt, userData.UpdatedAt)
+	_, err = stmt.Exec(user.Name, user.Email, user.PassWord, user.CreatedAt, user.UpdatedAt)
 
 	return err
 
