@@ -1,4 +1,4 @@
-package model
+package user
 
 import (
 	"time"
@@ -14,19 +14,15 @@ type User struct {
 	UpdatedAt time.Time `json:"updatedat"`
 }
 
-type LoginState struct {
-	Email    string `json:"email"`
-	PassWord string `json:"password"`
+//Userの構造体を取得
+func NewUser() *User {
+	return new(User)
 }
 
-//loginのdb操作
-func Login(body []byte, email string) User {
+//login
+func (user *User) Login(email string) {
 	db := db.ConnectDb()
 	defer db.Close()
 
-	var user User
 	db.QueryRow("SELECT * FROM users WHERE Email=?", email).Scan(&user.ID, &user.Name, &user.Email, &user.PassWord, &user.CreatedAt, &user.UpdatedAt)
-
-	return user
-
 }

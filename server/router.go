@@ -1,10 +1,9 @@
 package server
 
 import (
-	"todo-22-app/controller"
+	controller "todo-22-app/controller/user"
 	"todo-22-app/db"
 	"todo-22-app/todos"
-	"todo-22-app/users"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
@@ -14,8 +13,7 @@ func Router() *mux.Router {
 	db.CreateDb()
 
 	r := mux.NewRouter()
-	user := users.NewCreateUser()
-	r.HandleFunc("/createuser", user.CreateUser)
+	r.HandleFunc("/signup", controller.SingUp)
 	r.HandleFunc("/login", controller.Login)
 	r.HandleFunc("/createtodo", todos.CreateTodo)
 	r.HandleFunc("/deletetodo", todos.DeleteTodo)
