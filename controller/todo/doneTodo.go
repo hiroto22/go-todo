@@ -9,7 +9,7 @@ import (
 )
 
 //todo作成に使うAPI
-func DeleteTodo(w http.ResponseWriter, r *http.Request) {
+func DoneTodo(w http.ResponseWriter, r *http.Request) {
 	//cors
 	w.Header().Set("Content-Type", "*")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -32,10 +32,12 @@ func DeleteTodo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//queryからtodoのidを取得
+	//todoのidと状態(isComplete)を取得
 	id := r.URL.Query().Get("id")
+	isComplete := r.URL.Query().Get("isComplete")
 
-	todo.DeleteTodo(id)
+	//todoの状態を変更
+	todo.DoneTodo(id, isComplete)
 
 	json.NewEncoder(w).Encode(id)
 

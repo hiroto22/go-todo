@@ -4,18 +4,61 @@ import (
 	"database/sql"
 	"log"
 	"os"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
+)
+
+type Todo struct {
+	Todo      string    `json:"todo"`
+	CreatedAt time.Time `json:"createdat"`
+	UpdatedAt time.Time `json:"updatedat"`
+}
+
+type User struct {
+	ID        int       `json:"id"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
+	PassWord  string    `json:"password"`
+	CreatedAt time.Time `json:"createdat"`
+	UpdatedAt time.Time `json:"updatedat"`
+}
+
+var (
+	//Client user_id database
+	db  *sql.DB
+	err error
 )
 
 func ConnectDb() *sql.DB {
 	godotenv.Load()
 
 	dbConnectionInfo := os.Getenv("DATABASE_URL")
-	db, _ := sql.Open("mysql", dbConnectionInfo)
+	db, _ = sql.Open("mysql", dbConnectionInfo)
 	return db
 }
+
+func init() {
+	godotenv.Load()
+
+	dbConnectionInfo := os.Getenv("DATABASE_URL")
+	db, _ = sql.Open("mysql", dbConnectionInfo)
+}
+
+// func Login(email string, id int, name string, password string, createdAt time.Time, updatedAt time.Time) {
+// 	db.QueryRow("SELECT * FROM users WHERE Email=?", email).Scan(&user.ID, &user.Name, &user.Email, &user.PassWord, &user.CreatedAt, &user.UpdatedAt)
+// }
+
+// func CreateTodo(todo string, userID interface{}, createdAt time.Time, updatedAt time.Time) error {
+// 	stmt, err := db.Prepare("INSERT INTO todos (Todo,UserID,CreatedAt,UpdatedAt) VALUES(?,?,?,?)")
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	_, err = stmt.Exec(todo, userID, createdAt, updatedAt)
+// 	return err
+// }
 
 //DBをcreateする
 func CreateDb() {

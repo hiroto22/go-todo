@@ -2,14 +2,19 @@ package todo
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"strings"
 	"todo-22-app/auth"
-	"todo-22-app/model/todo"
+	model "todo-22-app/model/todo"
 )
 
-//todo作成に使うAPI
-func DeleteTodo(w http.ResponseWriter, r *http.Request) {
+type EditTodoState struct {
+	Todo string `json:"todo"`
+}
+
+//todo変更に使うAPI
+func EditTodo(w http.ResponseWriter, r *http.Request) {
 	//cors
 	w.Header().Set("Content-Type", "*")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -32,11 +37,26 @@ func DeleteTodo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//queryからtodoのidを取得
+	//todoのidと変更内容を取得
 	id := r.URL.Query().Get("id")
 
-	todo.DeleteTodo(id)
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Internal Server Error", 500)
+		return
+	}
 
-	json.NewEncoder(w).Encode(id)
+	//todoの内容と変更日時を記録
+	var data EditTodoState
+	if err := json.Unmarshal(body, &data); err != nil {
+		http.Error(w, "400 Bad Request", 400)
+		return
+	}
+
+	//todoを更新
+	EditTodo := model.NewEditTodo()
+	EditTodo.EditTodo(data.Todo, id)
+
+	json.NewEncoder(w).Encode(EditTodo)
 
 }

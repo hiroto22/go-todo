@@ -2,14 +2,18 @@ package todo
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
+	"os"
 	"strings"
 	"todo-22-app/auth"
-	"todo-22-app/model/todo"
+	model "todo-22-app/model/todo"
+
+	"github.com/dgrijalva/jwt-go"
 )
 
-//todo作成に使うAPI
-func DeleteTodo(w http.ResponseWriter, r *http.Request) {
+//todo変更に使うAPI
+func GetTodoListWithUserId(w http.ResponseWriter, r *http.Request) {
 	//cors
 	w.Header().Set("Content-Type", "*")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -32,11 +36,26 @@ func DeleteTodo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//queryからtodoのidを取得
-	id := r.URL.Query().Get("id")
+	//指定されたisDoneの状態を取得
+	isDone := r.URL.Query().Get("isdone")
 
-	todo.DeleteTodo(id)
+	//tokenからuserIdを取得
+	var secretKey = os.Getenv("SECURITY_KEY")
+	claims := jwt.MapClaims{}
+	_, err = jwt.ParseWithClaims(tokenString, claims, func(userid *jwt.Token) (interface{}, error) {
+		return []byte(secretKey), nil
+	})
+	if err != nil {
+		http.Error(w, "Internal Server Error", 500)
+		return
+	}
+	userID := claims["userid"]
 
-	json.NewEncoder(w).Encode(id)
+	todoList := model.NewTodoList()
+	todoList.GetTodoListWithUserId(isDone, userID)
+
+	log.Println(todoList)
+
+	json.NewEncoder(w).Encode(todoList)
 
 }

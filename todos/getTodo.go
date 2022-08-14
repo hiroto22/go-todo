@@ -11,6 +11,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
+//現在使用していない
 //1つ1つのtodoを取得するAPI
 func GetTodo(w http.ResponseWriter, r *http.Request) {
 	//CORS

@@ -12,13 +12,21 @@ import (
 
 type TodoState struct {
 	Todo   string      `json:"todo"`
-	UserID interface{} `json:"userid,string"`
+	UserID interface{} `json:"userid"`
 }
 
 //todo作成に使うAPI
 func CreateTodo(w http.ResponseWriter, r *http.Request) {
 	//cors
-	middleware.Cors(w, r)
+	w.Header().Set("Content-Type", "*")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	switch r.Method {
+	case "OPTIONS":
+		w.Header().Set("Access-Control-Allow-Headers", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		return
+	}
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
 
 	//Tokenをリクエストのheaderから取得
 	tokenString := r.Header.Get("Authorization")
