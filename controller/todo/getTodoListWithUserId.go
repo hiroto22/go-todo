@@ -3,12 +3,10 @@ package todo
 import (
 	"encoding/json"
 	"net/http"
-	"os"
 	"strings"
 	"todo-22-app/auth"
+	"todo-22-app/middleware"
 	model "todo-22-app/model/todo"
-
-	"github.com/dgrijalva/jwt-go"
 )
 
 //todo変更に使うAPI
@@ -28,16 +26,8 @@ func GetTodoListWithUserId(w http.ResponseWriter, r *http.Request) {
 	isDone := r.URL.Query().Get("isdone")
 
 	//tokenからuserIdを取得
-	var secretKey = os.Getenv("SECURITY_KEY")
-	claims := jwt.MapClaims{}
-	_, err = jwt.ParseWithClaims(tokenString, claims, func(userid *jwt.Token) (interface{}, error) {
-		return []byte(secretKey), nil
-	})
-	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-	userID := claims["userid"]
+	//取得したtokenからuseIdを特定
+	userID := middleware.GetUserIdFromToken(tokenString)
 
 	todoList := model.NewTodoList()
 	todoList.GetTodoListWithUserId(isDone, userID)
