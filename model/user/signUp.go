@@ -18,6 +18,7 @@ func NewSignUpUser() *SignUpUser {
 	return new(SignUpUser)
 }
 
+//signup
 func (user *SignUpUser) SingUp(name string, email string, password string, db *sql.DB) error {
 	nowTime := time.Now()
 	//DBに送るuser情報

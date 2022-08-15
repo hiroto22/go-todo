@@ -20,7 +20,7 @@ func NewTodoList() *TodoList {
 	return new(TodoList)
 }
 
-//login
+//todoの一覧を取得する
 func (todoList *TodoList) GetTodoListWithUserId(isDone string, userID interface{}, db *sql.DB) error {
 
 	rows, err := db.Query("SELECT * FROM todos WHERE IsDone=? AND UserID=?", isDone, userID)

@@ -9,7 +9,7 @@ import (
 	"todo-22-app/model/todo"
 )
 
-//todo作成に使うAPI
+//todo削除に使うAPI
 func DeleteTodo(w http.ResponseWriter, r *http.Request) {
 	db := db.ConnectedDb()
 	//Tokenをリクエストのheaderから取得

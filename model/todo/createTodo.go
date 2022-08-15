@@ -15,7 +15,7 @@ func NewTodo() *Todo {
 	return new(Todo)
 }
 
-//login
+//todoの登録を行う
 func (todo *Todo) CreateTodo(todoText string, userID interface{}, db *sql.DB) error {
 	//DBに送るデータ(user_id以外)
 	nowTime := time.Now() //現在時刻の取得

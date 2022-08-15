@@ -10,7 +10,7 @@ import (
 	model "todo-22-app/model/todo"
 )
 
-//todo変更に使うAPI
+//todo一覧の取得に使うAPI
 func GetTodoListWithUserId(w http.ResponseWriter, r *http.Request) {
 	db := db.ConnectedDb()
 	//Tokenをリクエストのheaderから取得

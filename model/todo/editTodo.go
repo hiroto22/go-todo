@@ -14,7 +14,7 @@ func NewEditTodo() *EditTodo {
 	return new(EditTodo)
 }
 
-//login
+//todoの内容を更新する
 func (todo *EditTodo) EditTodo(todoText string, id string, db *sql.DB) error {
 	todo.Todo = todoText
 	todo.UpdatedAt = time.Now()

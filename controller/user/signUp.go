@@ -18,6 +18,7 @@ type SignUpState struct {
 	PassWord string `json:"password"`
 }
 
+//signup
 func SingUp(w http.ResponseWriter, r *http.Request) {
 	db := db.ConnectedDb()
 	//requestされたデータの読み込み

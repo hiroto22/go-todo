@@ -9,7 +9,7 @@ import (
 	"todo-22-app/model/todo"
 )
 
-//todo作成に使うAPI
+//todoの状態変更に使うAPI
 func DoneTodo(w http.ResponseWriter, r *http.Request) {
 	db := db.ConnectedDb()
 	//Tokenをリクエストのheaderから取得

@@ -2,7 +2,7 @@ package todo
 
 import "database/sql"
 
-//login
+//todoを完了または未完了にする
 func DoneTodo(id string, isComplete string, db *sql.DB) error {
 	//現在のisCompleteにあわせて更新する
 	if isComplete == "false" {
