@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"todo-22-app/auth"
-	"todo-22-app/middleware"
 	model "todo-22-app/model/user"
 	"todo-22-app/view"
 )
@@ -17,9 +16,6 @@ type LoginState struct {
 
 //loginの際に使うAPI
 func Login(w http.ResponseWriter, r *http.Request) {
-	//cors
-	middleware.Cors(w, r)
-
 	//requestされたデータの読み込み
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
