@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"todo-22-app/auth"
+	"todo-22-app/db"
 	model "todo-22-app/model/user"
 	"todo-22-app/view"
 )
@@ -16,6 +17,7 @@ type LoginState struct {
 
 //loginの際に使うAPI
 func Login(w http.ResponseWriter, r *http.Request) {
+	db := db.ConnectedDb()
 	//requestされたデータの読み込み
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -29,7 +31,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	//データベースから情報を取得
 	user := model.NewUser()
-	user.Login(email)
+	user.Login(email, db)
 
 	//requestされたemail,passwordとDBの物が正しいか確認正しければtokenを返す
 	err = auth.PasswordVerify(user.PassWord, data.PassWord)

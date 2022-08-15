@@ -1,24 +1,14 @@
 package todo
 
-import (
-	"todo-22-app/db"
-)
+import "database/sql"
 
 //login
-func DeleteTodo(id string) error {
-	db := db.ConnectDb()
-	defer db.Close()
-
+func DeleteTodo(id string, db *sql.DB) error {
 	//dbから特定のtodoを削除
-	stmt, err := db.Prepare("DELETE FROM todos WHERE ID=?")
+	_, err := db.Query("DELETE FROM todos WHERE ID=?", id)
 	if err != nil {
 		return err
 	}
 
-	_, err = stmt.Exec(id)
-	if err != nil {
-		return err
-	}
-	return err
-
+	return nil
 }

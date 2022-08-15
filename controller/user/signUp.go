@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"todo-22-app/auth"
+	"todo-22-app/db"
 	model "todo-22-app/model/user"
 	"todo-22-app/view"
 
@@ -18,6 +19,7 @@ type SignUpState struct {
 }
 
 func SingUp(w http.ResponseWriter, r *http.Request) {
+	db := db.ConnectedDb()
 	//requestされたデータの読み込み
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -48,11 +50,11 @@ func SingUp(w http.ResponseWriter, r *http.Request) {
 
 	//データベースに情報を登録
 	signupUser := model.NewSignUpUser()
-	signupUser.SingUp(name, email, string(hashPassWord))
+	signupUser.SingUp(name, email, string(hashPassWord), db)
 
 	//データベースから情報を取得
 	user := model.NewUser()
-	user.Login(email)
+	user.Login(email, db)
 
 	token, err := auth.CreateToken(user.ID)
 	if err != nil {

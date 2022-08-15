@@ -3,7 +3,6 @@ package todo
 import (
 	"database/sql"
 	"time"
-	"todo-22-app/db"
 )
 
 type TodoForList struct {
@@ -22,9 +21,7 @@ func NewTodoList() *TodoList {
 }
 
 //login
-func (todoList *TodoList) GetTodoListWithUserId(isDone string, userID interface{}) error {
-	db := db.ConnectDb()
-	defer db.Close()
+func (todoList *TodoList) GetTodoListWithUserId(isDone string, userID interface{}, db *sql.DB) error {
 
 	rows, err := db.Query("SELECT * FROM todos WHERE IsDone=? AND UserID=?", isDone, userID)
 	if err != nil {
@@ -51,7 +48,7 @@ func (todoList *TodoList) GetTodoListWithUserId(isDone string, userID interface{
 
 	defer rows.Close()
 
-	return err
+	return nil
 }
 
 func (todoList *TodoList) AddTodo(a TodoForList) {

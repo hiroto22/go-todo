@@ -1,8 +1,8 @@
 package user
 
 import (
+	"database/sql"
 	"time"
-	"todo-22-app/db"
 )
 
 type User struct {
@@ -20,9 +20,9 @@ func NewUser() *User {
 }
 
 //login
-func (user *User) Login(email string) {
-	db := db.ConnectDb()
-	defer db.Close()
-
-	db.QueryRow("SELECT * FROM users WHERE Email=?", email).Scan(&user.ID, &user.Name, &user.Email, &user.PassWord, &user.CreatedAt, &user.UpdatedAt)
+func (user *User) Login(email string, db *sql.DB) error {
+	if err := db.QueryRow("SELECT * FROM users WHERE Email=?", email).Scan(&user.ID, &user.Name, &user.Email, &user.PassWord, &user.CreatedAt, &user.UpdatedAt); err != nil {
+		return err
+	}
+	return nil
 }

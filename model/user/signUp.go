@@ -1,8 +1,8 @@
 package user
 
 import (
+	"database/sql"
 	"time"
-	"todo-22-app/db"
 )
 
 type SignUpUser struct {
@@ -18,10 +18,7 @@ func NewSignUpUser() *SignUpUser {
 	return new(SignUpUser)
 }
 
-func (user *SignUpUser) SingUp(name string, email string, password string) error {
-	db := db.ConnectDb()
-	defer db.Close()
-
+func (user *SignUpUser) SingUp(name string, email string, password string, db *sql.DB) error {
 	nowTime := time.Now()
 	//DBに送るuser情報
 	user.Name = name
@@ -31,12 +28,10 @@ func (user *SignUpUser) SingUp(name string, email string, password string) error
 	user.UpdatedAt = nowTime
 
 	//DBにuser情報を登録
-	stmt, err := db.Prepare("INSERT INTO users (Name,Email,PassWord,CreatedAt,UpdatedAt) VALUES(?,?,?,?,?)")
+	_, err := db.Exec("INSERT INTO users (Name,Email,PassWord,CreatedAt,UpdatedAt) VALUES(?,?,?,?,?)", user.Name, user.Email, user.PassWord, user.CreatedAt, user.UpdatedAt)
 	if err != nil {
 		return err
 	}
-
-	_, err = stmt.Exec(user.Name, user.Email, user.PassWord, user.CreatedAt, user.UpdatedAt)
 
 	return err
 

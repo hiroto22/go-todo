@@ -1,8 +1,8 @@
 package todo
 
 import (
+	"database/sql"
 	"time"
-	"todo-22-app/db"
 )
 
 type Todo struct {
@@ -16,10 +16,7 @@ func NewTodo() *Todo {
 }
 
 //login
-func (todo *Todo) CreateTodo(todoText string, userID interface{}) error {
-	db := db.ConnectDb()
-	defer db.Close()
-
+func (todo *Todo) CreateTodo(todoText string, userID interface{}, db *sql.DB) error {
 	//DBに送るデータ(user_id以外)
 	nowTime := time.Now() //現在時刻の取得
 	todo.Todo = todoText
@@ -27,13 +24,11 @@ func (todo *Todo) CreateTodo(todoText string, userID interface{}) error {
 	todo.UpdatedAt = nowTime
 
 	//DBにTODOを追加
-	stmt, err := db.Prepare("INSERT INTO todos (Todo,UserID,CreatedAt,UpdatedAt) VALUES(?,?,?,?)")
-	if err != nil {
+
+	if _, err := db.Exec("INSERT INTO todos (Todo,UserID,CreatedAt,UpdatedAt) VALUES(?,?,?,?)", todo.Todo, userID, todo.CreatedAt, todo.UpdatedAt); err != nil {
 		return err
 	}
 
-	_, err = stmt.Exec(todo.Todo, userID, todo.CreatedAt, todo.UpdatedAt)
-
-	return err
+	return nil
 
 }

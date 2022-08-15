@@ -1,30 +1,20 @@
 package todo
 
-import (
-	"todo-22-app/db"
-)
+import "database/sql"
 
 //login
-func DoneTodo(id string, isComplete string) error {
-	db := db.ConnectDb()
-	defer db.Close()
-
-	stmt, err := db.Prepare("UPDATE todos set IsDone=? WHERE ID=?")
-	if err != nil {
-		return err
-	}
-
+func DoneTodo(id string, isComplete string, db *sql.DB) error {
 	//現在のisCompleteにあわせて更新する
 	if isComplete == "false" {
-		_, err = stmt.Exec(true, id)
+		_, err := db.Exec("UPDATE todos set IsDone=? WHERE ID=?", true, id)
 		if err != nil {
 			return err
 		}
 	} else {
-		_, err = stmt.Exec(false, id)
+		_, err := db.Exec("UPDATE todos set IsDone=? WHERE ID=?", false, id)
 		if err != nil {
 			return err
 		}
 	}
-	return err
+	return nil
 }

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 	"todo-22-app/auth"
+	"todo-22-app/db"
 	"todo-22-app/middleware"
 	model "todo-22-app/model/todo"
 )
@@ -17,6 +18,7 @@ type TodoState struct {
 
 //todo作成に使うAPI
 func CreateTodo(w http.ResponseWriter, r *http.Request) {
+	db := db.ConnectedDb()
 	//Tokenをリクエストのheaderから取得
 	tokenString := r.Header.Get("Authorization")
 	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
@@ -45,7 +47,7 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 
 	//todoをデータベースに登録
 	todo := model.NewTodo()
-	todo.CreateTodo(data.Todo, data.UserID)
+	todo.CreateTodo(data.Todo, data.UserID, db)
 
 	json.NewEncoder(w).Encode(todo)
 

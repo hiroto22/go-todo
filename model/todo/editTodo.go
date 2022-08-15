@@ -1,8 +1,8 @@
 package todo
 
 import (
+	"database/sql"
 	"time"
-	"todo-22-app/db"
 )
 
 type EditTodo struct {
@@ -15,24 +15,16 @@ func NewEditTodo() *EditTodo {
 }
 
 //login
-func (todo *EditTodo) EditTodo(todoText string, id string) error {
-	db := db.ConnectDb()
-	defer db.Close()
-
+func (todo *EditTodo) EditTodo(todoText string, id string, db *sql.DB) error {
 	todo.Todo = todoText
 	todo.UpdatedAt = time.Now()
 
 	//todoを更新
-	stmt, err := db.Prepare("UPDATE todos set Todo=?, UpdatedAt=? WHERE ID=?")
+	_, err := db.Exec("UPDATE todos set Todo=?, UpdatedAt=? WHERE ID=?", todo.Todo, todo.UpdatedAt, id)
 	if err != nil {
 		return err
 	}
 
-	_, err = stmt.Exec(todo.Todo, todo.UpdatedAt, id)
-	if err != nil {
-		return err
-	}
-
-	return err
+	return nil
 
 }

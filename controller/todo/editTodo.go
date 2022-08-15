@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 	"todo-22-app/auth"
+	"todo-22-app/db"
 	model "todo-22-app/model/todo"
 )
 
@@ -15,6 +16,7 @@ type EditTodoState struct {
 
 //todo変更に使うAPI
 func EditTodo(w http.ResponseWriter, r *http.Request) {
+	db := db.ConnectedDb()
 	//Tokenをリクエストのheaderから取得
 	tokenString := r.Header.Get("Authorization")
 	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
@@ -44,7 +46,7 @@ func EditTodo(w http.ResponseWriter, r *http.Request) {
 
 	//todoを更新
 	EditTodo := model.NewEditTodo()
-	EditTodo.EditTodo(data.Todo, id)
+	EditTodo.EditTodo(data.Todo, id, db)
 
 	json.NewEncoder(w).Encode(EditTodo)
 
