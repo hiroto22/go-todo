@@ -2,7 +2,6 @@ package todo
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -53,8 +52,6 @@ func GetTodoListWithUserId(w http.ResponseWriter, r *http.Request) {
 
 	todoList := model.NewTodoList()
 	todoList.GetTodoListWithUserId(isDone, userID)
-
-	log.Println(todoList)
 
 	json.NewEncoder(w).Encode(todoList)
 

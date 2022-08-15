@@ -22,7 +22,7 @@ func NewTodoList() *TodoList {
 }
 
 //login
-func (todoList TodoList) GetTodoListWithUserId(isDone string, userID interface{}) error {
+func (todoList *TodoList) GetTodoListWithUserId(isDone string, userID interface{}) error {
 	db := db.ConnectDb()
 	defer db.Close()
 
@@ -45,11 +45,15 @@ func (todoList TodoList) GetTodoListWithUserId(isDone string, userID interface{}
 		if err != nil {
 			return err
 		} else {
-			todoList = append(todoList, todo)
+			todoList.AddTodo(todo)
 		}
 	}
 
 	defer rows.Close()
 
 	return err
+}
+
+func (todoList *TodoList) AddTodo(a TodoForList) {
+	*todoList = append(*todoList, a)
 }
