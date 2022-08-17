@@ -12,7 +12,7 @@ type CreateTokenState struct {
 	Id int `json:"id"`
 }
 
-//tokenをつくる
+//tokenを発行
 func CreateToken(userid int) (string, error) {
 
 	token := jwt.New(jwt.GetSigningMethod("HS256"))
