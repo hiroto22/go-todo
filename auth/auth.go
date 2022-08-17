@@ -34,14 +34,3 @@ func CreateToken(userid int) (string, error) {
 func PasswordVerify(hash, pw string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(pw))
 }
-
-//token認証
-func TokenVerify(tokenString string) (*jwt.Token, error) {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		return []byte("gotodo"), nil
-	})
-	if err != nil {
-		return token, err
-	}
-	return token, nil
-}
