@@ -1,8 +1,9 @@
 package server
 
 import (
-	todoController "todo-22-app/controller/todo"
-	controller "todo-22-app/controller/user"
+	"todo-22-app/controller/todoController"
+	"todo-22-app/controller/userController"
+	"todo-22-app/middleware"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
@@ -11,13 +12,19 @@ import (
 func Router() *mux.Router {
 
 	r := mux.NewRouter()
-	r.HandleFunc("/signup", controller.SingUp)
-	r.HandleFunc("/login", controller.Login)
-	r.HandleFunc("/createtodo", todoController.CreateTodo)
-	r.HandleFunc("/deletetodo", todoController.DeleteTodo)
-	r.HandleFunc("/edittodo", todoController.EditTodo)
-	r.HandleFunc("/completetodo", todoController.DoneTodo)
-	r.HandleFunc("/getusertodoList", todoController.GetTodoListWithUserId)
+	//cors処理
+	r.Use(middleware.Cors().Handler)
+
+	r.HandleFunc("/signup", userController.SingUp)
+	r.HandleFunc("/login", userController.Login)
+
+	auth := r.PathPrefix("/").Subrouter()
+	auth.Use(middleware.TokenVerify)
+	auth.HandleFunc("/deletetodo", todoController.DeleteTodo)
+	auth.HandleFunc("/edittodo", todoController.EditTodo)
+	auth.HandleFunc("/completetodo", todoController.DoneTodo)
+	auth.HandleFunc("/createtodo", todoController.CreateTodo)
+	auth.HandleFunc("/getusertodoList", todoController.GetTodoListWithUserId)
 
 	return r
 

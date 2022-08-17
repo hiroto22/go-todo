@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"os"
 	"todo-22-app/db"
-	"todo-22-app/middleware"
 	"todo-22-app/server"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -14,12 +13,10 @@ import (
 func main() {
 	godotenv.Load()
 
-	db := db.ConnectDb()
-	defer db.Close()
+	db.ConnectDb()
+	defer db.DB.Close()
 
-	cors := middleware.Cors()
 	server := server.Router()
-	handler := cors.Handler(server)
-	http.ListenAndServe(":"+os.Getenv("PORT"), handler)
+	http.ListenAndServe(":"+os.Getenv("PORT"), server)
 
 }
