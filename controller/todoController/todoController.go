@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
-	"strings"
-	"todo-22-app/middleware"
 	"todo-22-app/model/todoModel"
 )
 
@@ -16,14 +14,10 @@ type TodoState struct {
 
 //todo作成に使うAPI
 func CreateTodo(w http.ResponseWriter, r *http.Request) {
-	//Tokenをリクエストのheaderから取得
-	tokenString := r.Header.Get("Authorization")
-	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
-
 	var data TodoState
 
 	//取得したtokenからuseIdを特定
-	userID := middleware.SetUserIdFromToken(tokenString)
+	userID := r.Context().Value("userID")
 
 	data.UserID = userID
 
@@ -101,16 +95,10 @@ func EditTodo(w http.ResponseWriter, r *http.Request) {
 
 //todo一覧の取得に使うAPI
 func GetTodoListWithUserId(w http.ResponseWriter, r *http.Request) {
-	//Tokenをリクエストのheaderから取得
-	tokenString := r.Header.Get("Authorization")
-	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
-
 	//指定されたisDoneの状態を取得
 	isDone := r.URL.Query().Get("isdone")
 
-	//tokenからuserIdを取得
-	//取得したtokenからuseIdを特定
-	userID := middleware.SetUserIdFromToken(tokenString)
+	userID := r.Context().Value("userID")
 
 	todoList := todoModel.NewTodoList()
 	todoList.GetTodoListWithUserId(isDone, userID)
