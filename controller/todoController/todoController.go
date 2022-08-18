@@ -1,4 +1,4 @@
-package todoController
+package todocontroller
 
 import (
 	"encoding/json"
