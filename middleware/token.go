@@ -29,7 +29,7 @@ func TokenVerify(next http.Handler) http.Handler {
 			return []byte(secretKey), nil
 		})
 
-		userID := claims["userid"]
+		userID := claims["userid"].(float64)
 
 		ctx := context.WithValue(r.Context(), "userID", userID)
 

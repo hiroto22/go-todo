@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
-	"todo-22-app/model/todoModel"
+	todomodel "todo-22-app/model/todoModel"
 )
 
 type TodoState struct {
-	Todo   string      `json:"todo"`
-	UserID interface{} `json:"userid"`
+	Todo   string  `json:"todo"`
+	UserID float64 `json:"userid"`
 }
 
 //todo作成に使うAPI
@@ -17,7 +17,7 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 	var data TodoState
 
 	//取得したtokenからuseIdを特定
-	userID := r.Context().Value("userID")
+	userID := r.Context().Value("userID").(float64)
 
 	data.UserID = userID
 
@@ -31,7 +31,7 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(body, &data)
 
 	//todoをデータベースに登録
-	todo := todoModel.NewTodo()
+	todo := todomodel.NewTodo()
 	todo.CreateTodo(data.Todo, data.UserID)
 
 	json.NewEncoder(w).Encode(todo)
@@ -43,7 +43,7 @@ func DeleteTodo(w http.ResponseWriter, r *http.Request) {
 	//queryからtodoのidを取得
 	id := r.URL.Query().Get("id")
 
-	todoModel.DeleteTodo(id)
+	todomodel.DeleteTodo(id)
 
 	json.NewEncoder(w).Encode(id)
 
@@ -56,7 +56,7 @@ func DoneTodo(w http.ResponseWriter, r *http.Request) {
 	isComplete := r.URL.Query().Get("isComplete")
 
 	//todoの状態を変更
-	todoModel.DoneTodo(id, isComplete)
+	todomodel.DoneTodo(id, isComplete)
 
 	json.NewEncoder(w).Encode(id)
 
@@ -86,7 +86,7 @@ func EditTodo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//todoを更新
-	EditTodo := todoModel.NewEditTodo()
+	EditTodo := todomodel.NewEditTodo()
 	EditTodo.EditTodo(data.Todo, id)
 
 	json.NewEncoder(w).Encode(EditTodo)
@@ -98,9 +98,9 @@ func GetTodoListWithUserId(w http.ResponseWriter, r *http.Request) {
 	//指定されたisDoneの状態を取得
 	isDone := r.URL.Query().Get("isdone")
 
-	userID := r.Context().Value("userID")
+	userID := r.Context().Value("userID").(float64)
 
-	todoList := todoModel.NewTodoList()
+	todoList := todomodel.NewTodoList()
 	todoList.GetTodoListWithUserId(isDone, userID)
 
 	json.NewEncoder(w).Encode(todoList)

@@ -1,4 +1,4 @@
-package todoModel
+package todomodel
 
 import (
 	"database/sql"
@@ -17,7 +17,7 @@ func NewTodo() *Todo {
 }
 
 //todoの登録を行う
-func (todo *Todo) CreateTodo(todoText string, userID interface{}) error {
+func (todo *Todo) CreateTodo(todoText string, userID float64) error {
 	//DBに送るデータ(user_id以外)
 	nowTime := time.Now() //現在時刻の取得
 	todo.Todo = todoText
@@ -102,7 +102,7 @@ func NewTodoList() *TodoList {
 }
 
 //todoの一覧を取得する
-func (todoList *TodoList) GetTodoListWithUserId(isDone string, userID interface{}) error {
+func (todoList *TodoList) GetTodoListWithUserId(isDone string, userID float64) error {
 
 	rows, err := db.DB.Query("SELECT * FROM todos WHERE IsDone=? AND UserID=?", isDone, userID)
 	if err != nil {
